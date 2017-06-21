@@ -34,7 +34,9 @@ namespace exercise01
         {
             string firstName, lastName;
             int age;
+            double daysInLeapYear = 365.25;
             bool inputCorrect = false;
+            DateTime birthDay;
 
             /* Ask user for first and last name, 
              * save to variables */
@@ -50,7 +52,7 @@ namespace exercise01
 
             do
             {
-                Console.Write("Enter age:");
+                Console.Write("Enter age: ");
 
                 /* int.TryParse() converts string to integer
                  * returns true/false depending on conversion success  */
@@ -65,8 +67,47 @@ namespace exercise01
 
             } while (!inputCorrect);
 
-            /* Calculate age in days and display result */
-            Console.WriteLine("You are {0} days old!", age * 365);
+            /* Calculate age in days and display result, does not
+             * account for leap years, and does not count days after
+             * birthday */
+            Console.WriteLine("You are {0} days old!", age * daysInLeapYear);
+
+            /* Ask user for birth date */
+            Console.WriteLine("When were you born?");
+
+            do
+            {
+                Console.Write("Enter date as YYYY-MM-DD: ");
+                /* DateTime.TryParse() converts string to DateTime
+                 * returns true/false depending on conversion success  */
+                inputCorrect = DateTime.TryParse(
+                    Console.ReadLine(), 
+                    out birthDay);
+
+                /* If conversion was unsuccessful 
+                 * (user didnt enter correct date format) */
+                if (!inputCorrect)
+                {
+                    Console.WriteLine("Faulty date input!");
+                }
+
+            } while (!inputCorrect);
+            
+            /* Calculate time interval since birth,
+             * DateTime.Now returns current local computer date and time */
+            TimeSpan timeSinceBirth = DateTime.Now - birthDay;
+
+            /* {X:N0} formats number to use 0 digits after decimal point
+             * No rounding is occured */
+            Console.WriteLine("** Data about your age ** " +
+                "\nTotal birthdays: {0:N0}" +
+                "\nYour age in months: {1:N0}" +
+                "\nYour age in days: {2:N0}" +
+                "\nYour age in hours: {3:N0}",
+                timeSinceBirth.TotalDays / daysInLeapYear,
+                timeSinceBirth.TotalDays / daysInLeapYear * 12,
+                timeSinceBirth.TotalDays,
+                timeSinceBirth.TotalDays * 24);
 
             Console.ReadLine();
         }

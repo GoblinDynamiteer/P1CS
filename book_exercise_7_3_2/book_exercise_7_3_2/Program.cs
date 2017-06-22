@@ -23,14 +23,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace book_exercise_7_3_1
+namespace book_exercise_7_3_2
 {
     class Program
     {
         static void Main(string[] args)
         {
             char answer;
-            Console.WriteLine("Is it nice weather today? (y)");
+            Console.WriteLine("Is it nice weather today? (y/n)");
 
             answer = Console.ReadKey(true).KeyChar;
 

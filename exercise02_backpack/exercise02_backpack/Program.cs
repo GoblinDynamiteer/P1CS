@@ -46,9 +46,18 @@ namespace exercise02_backpack
 {
     class Program
     {
+        /* Make BackPack object public, to be accessable
+         * in Menu class */
+        public static BackPack backPack = new BackPack();
+        static Menu menu = new Menu();
+
         static void Main(string[] args)
         {
-            Menu menu = new Menu();
+            backPack.AddItem("Zorro");
+            backPack.AddItem("Banana");
+            backPack.AddItem("Apple");
+            backPack.AddItem("Book");
+            backPack.AddItem("Pen");
 
             while (true)
             {
@@ -58,11 +67,11 @@ namespace exercise02_backpack
         }
     }
 
-    class Menu
+    public class Menu
     {
         /* Menu text */
         static string menuTitle = "Welcome to the backpack!";
-        static string menuIndent = "     ";
+        public static string menuIndent = "     ";
         static string menuHelp = string.Format("{0}{1}\n{0}{2}\n{0}{3}",
             menuIndent,
             "Use the up and down arrow keys to navigate!",
@@ -78,7 +87,7 @@ namespace exercise02_backpack
         /* Keeps track of current selected menu item */
         int currentSelection = 0;
 
-        /* Display main menu, highlight current menu item */
+        /* Generate main menu */
         public void ShowMainMenu()
         {
             Console.Clear(); // Clear console window
@@ -172,13 +181,13 @@ namespace exercise02_backpack
 
                 case 1:
                     Console.Clear();
-                    Console.WriteLine("<DISPLAY ITEM PLACEHOLDER>");
+                    Program.backPack.DisplayItems();
                     Console.ReadKey(true);
                     break;
 
                 case 2:
                     Console.Clear();
-                    Console.WriteLine("<CLEAR ITEM PLACEHOLDER>");
+                    Program.backPack.ClearItems();
                     Console.ReadKey(true);
                     break;
 
@@ -186,6 +195,43 @@ namespace exercise02_backpack
                     Environment.Exit(0);
                     break;
             }
+        }
+    }
+
+    public class BackPack
+    {
+        static List<Tuple<String, int>> items = new List<Tuple<String, int>>();
+
+        public void AddItem(string itemName)
+        {
+            items.Add(Tuple.Create(itemName, 1));
+        }
+
+        public void DisplayItems()
+        {
+            /* Display if backpack item list is empty */
+            if (!items.Any())
+            {
+                Console.WriteLine("Backpack is empty!");
+                return; // ends void function
+            }
+
+            Console.WriteLine("{0}Items in backpack\n\n{0}Name:\t\tAmount:", 
+                Menu.menuIndent);
+            items.Sort();
+
+            foreach (Tuple < String, int> item in items)
+            {
+                Console.Write("{0}{1}\t\t{2}\n",
+                    Menu.menuIndent,
+                    item.Item1,
+                    item.Item2);
+            }
+        }
+
+        public void ClearItems()
+        {
+            items.Clear();
         }
     }
 

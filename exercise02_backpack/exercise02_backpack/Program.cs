@@ -60,33 +60,56 @@ namespace exercise02_backpack
 
     class Menu
     {
+        /* Menu text */
         static string menuTitle = "Welcome to the backpack!";
+        static string menuIndent = "     ";
+        static string menuHelp = string.Format("{0}{1}\n{0}{2}\n{0}{3}",
+            menuIndent,
+            "Use the up and down arrow keys to navigate!",
+            "Use the return key to select a menu item.",
+            "Or press the menu item number to enter menu");
         static string[] menuItem = {
-            "Add an item",
+            "Add an item to the backpack",
             "Display backpack contents",
             "Clear backpack contents",
             "Quit"
         };
 
+        /* Keeps track of current selected menu item */
         int currentSelection = 0;
-        int currentMenu = 0;
 
+        /* Display main menu, highlight current menu item */
         public void ShowMainMenu()
         {
-            Console.Clear();
-            Console.WriteLine(menuTitle);
+            Console.Clear(); // Clear console window
+            Console.Write("\n{0}{1}\n{0}", 
+                menuIndent, 
+                menuTitle);
 
+            /* Write a nice looking line under menu title */
+            for (int i = 0; i < menuTitle.Length; i++)
+            {
+                Console.Write("-");
+            }
+            Console.WriteLine("\n");
+            
+
+            /* List menu items */
             for (int i = 0; i < menuItem.Length; i++)
             {
+                /* Idicate current selection with "***"  */
                 string displayText = (currentSelection == i) ?
-                    String.Format("*{0}* {1}", i + 1, menuItem[i]) :
-                    String.Format("[{0}] {1}", i + 1, menuItem[i]);
+                    String.Format(" *** [{0}] {1}  ***", i + 1, menuItem[i]) :
+                    String.Format("{2}[{0}] {1}", i + 1, menuItem[i], menuIndent);
 
-                Console.WriteLine(displayText, i+1,
-                    menuItem[i]);
+                Console.WriteLine(displayText);
             }
+
+            /* Display menu help on navigation */
+            Console.WriteLine("\n" + menuHelp);
         }
 
+        /* Navigate the main menu */
         public void Navigate()
         {
             switch ( Console.ReadKey(true).Key )

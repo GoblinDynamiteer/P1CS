@@ -48,6 +48,65 @@ namespace exercise02_backpack
     {
         static void Main(string[] args)
         {
+            Menu menu = new Menu();
+
+            while (true)
+            {
+                menu.ShowMainMenu();
+                menu.Navigate();
+            }
         }
     }
+
+    class Menu
+    {
+        static string menuTitle = "Welcome to the backpack!";
+        static string[] menuItem = {
+            "Add an item",
+            "Display backpack contents",
+            "Clear backpack contents",
+            "Quit"
+        };
+
+        int currentSelection = 0;
+        int currentMenu = 0;
+
+        public void ShowMainMenu()
+        {
+            Console.Clear();
+            Console.WriteLine(menuTitle);
+
+            for (int i = 0; i < menuItem.Length; i++)
+            {
+                string displayText = (currentSelection == i) ?
+                    String.Format("*{0}* {1}", i + 1, menuItem[i]) :
+                    String.Format("[{0}] {1}", i + 1, menuItem[i]);
+
+                Console.WriteLine(displayText, i+1,
+                    menuItem[i]);
+            }
+        }
+
+        public void Navigate()
+        {
+            switch ( Console.ReadKey(true).Key )
+            {
+                case ConsoleKey.UpArrow:
+                    currentSelection = 
+                        (currentSelection - 1 < 0) ?
+                        3 : currentSelection - 1;
+                    break;
+
+                case ConsoleKey.DownArrow:
+                    currentSelection = 
+                        (currentSelection + 1 < menuItem.Length) ?
+                        currentSelection + 1 : 0;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    }
+
 }

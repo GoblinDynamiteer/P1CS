@@ -53,12 +53,7 @@ namespace exercise02_backpack
 
         static void Main(string[] args)
         {
-            backPack.AddItem("Zorro");
-            backPack.AddItem("Banana");
-            backPack.AddItem("Apple");
-            backPack.AddItem("Book");
-            backPack.AddItem("Pen");
-
+            /* Endless loop*/
             while (true)
             {
                 menu.ShowMainMenu();
@@ -71,7 +66,7 @@ namespace exercise02_backpack
     {
         /* Menu text */
         static string menuTitle = "Welcome to the backpack!";
-        public static string menuIndent = "     ";
+        public static string menuIndent = "     "; // for text indentation
         static string menuHelp = string.Format("{0}{1}\n{0}{2}\n{0}{3}",
             menuIndent,
             "Use the up and down arrow keys to navigate!",
@@ -84,18 +79,20 @@ namespace exercise02_backpack
             "Quit"
         };
 
-        /* Keeps track of current selected menu item */
+        /* Keeps track of currently highlighted 
+         * menu item */
         int currentSelection = 0;
 
         /* Generate main menu */
         public void ShowMainMenu()
         {
-            Console.Clear(); // Clear console window
+            /* Clear console text and print title */
+            Console.Clear();
             Console.Write("\n{0}{1}\n{0}",
                 menuIndent,
                 menuTitle);
 
-            /* Write a nice looking line under menu title */
+            /* Print a nice looking line under menu title */
             for (int i = 0; i < menuTitle.Length; i++)
             {
                 Console.Write("-");
@@ -106,10 +103,12 @@ namespace exercise02_backpack
             /* List menu items */
             for (int i = 0; i < menuItem.Length; i++)
             {
-                /* Idicate current selection with "***"  */
+                /* Indicate current selection with "***"  */
                 string displayText = (currentSelection == i) ?
-                    String.Format(" *** [{0}] {1}  ***", i + 1, menuItem[i]) :
-                    String.Format("{2}[{0}] {1}", i + 1, menuItem[i], menuIndent);
+                    String.Format(" *** [{0}] {1}  ***", 
+                        i + 1, menuItem[i]) :
+                    String.Format("{2}[{0}] {1}", 
+                        i + 1, menuItem[i], menuIndent);
 
                 Console.WriteLine(displayText);
             }
@@ -150,9 +149,13 @@ namespace exercise02_backpack
 
                 /* Number keys, goes directly into menu */
                 case ConsoleKey.D1:
+                case ConsoleKey.NumPad1:
                 case ConsoleKey.D2:
+                case ConsoleKey.NumPad2:
                 case ConsoleKey.D3:
+                case ConsoleKey.NumPad3:
                 case ConsoleKey.D4:
+                case ConsoleKey.NumPad4:
                     /* KeyChar returns actual character 
                      * from pressed key. 
                      * Convert to int for MenuAction().
@@ -168,71 +171,125 @@ namespace exercise02_backpack
             }
         }
 
+        public void menuPressAnyKey(string message = "")
+        {
+            Console.WriteLine("\n{0}{1}", menuIndent, message);
+            Console.WriteLine("{0}Press any key to continue!", 
+                menuIndent);
+            Console.ReadKey(true);
+        }
+
         /* Menu item selection actions */
         public void MenuAction(int menuItem)
         {
             switch (menuItem)
             {
-                case 0:
+                case 0: // Add backpack item
                     Console.Clear();
-                    Console.WriteLine("<ADD ITEM PLACEHOLDER>");
-                    Console.ReadKey(true);
+                    Console.Write("\n{0}Enter item to add: ", 
+                        menuIndent);
+                    string addItem = Console.ReadLine();
+                    Program.backPack.AddItem(addItem);
+                    menuPressAnyKey(
+                        string.Format("Item [{0}] added!", 
+                            addItem));
                     break;
 
-                case 1:
+                case 1: // Display backpack items
                     Console.Clear();
                     Program.backPack.DisplayItems();
-                    Console.ReadKey(true);
+                    menuPressAnyKey();
                     break;
 
-                case 2:
+                case 2: // Clear backpack items
                     Console.Clear();
                     Program.backPack.ClearItems();
-                    Console.ReadKey(true);
+                    menuPressAnyKey();
                     break;
 
                 case 3: // Quit program
+                    Console.Clear();
+                    menuPressAnyKey("Program will quit!");
                     Environment.Exit(0);
                     break;
             }
         }
     }
 
+    /* Items for the backpack */
+    public class Item
+    {
+        public string name { get; set; }
+        public int count { get; set; }
+    }
+
     public class BackPack
     {
-        static List<Tuple<String, int>> items = new List<Tuple<String, int>>();
+        /* List of Item class objects */
+        static List<Item> items = new List<Item>();
 
+        /* Add an item to backpack. */
         public void AddItem(string itemName)
         {
-            items.Add(Tuple.Create(itemName, 1));
+            bool newItem = true;
+
+            /* Check if item name already exists */
+            for (int i = 0; i < items.Count; i++)
+            {
+                /* Item already in list, increase count
+                 * by one and end function */
+                if (items[i].name == itemName) {
+                    items[i].count++;
+                    newItem = false;
+                }
+            }
+
+            /* Item was not found, add new with count 1 */
+            if (newItem)
+            {
+                items.Add(new Item { name = itemName, count = 1 });
+            }
+            
         }
 
         public void DisplayItems()
         {
-            /* Display if backpack item list is empty */
-            if (!items.Any())
+            /* Determine if item list is empty */
+            bool listEmpty = !items.Any();
+
+            if (listEmpty)
             {
-                Console.WriteLine("Backpack is empty!");
-                return; // ends void function
+                Console.WriteLine("\n{0}Backpack is empty!", 
+                    Menu.menuIndent);
             }
 
-            Console.WriteLine("{0}Items in backpack\n\n{0}Name:\t\tAmount:", 
-                Menu.menuIndent);
-            items.Sort();
 
-            foreach (Tuple < String, int> item in items)
+            else
             {
-                Console.Write("{0}{1}\t\t{2}\n",
-                    Menu.menuIndent,
-                    item.Item1,
-                    item.Item2);
+                Console.WriteLine("\n{0}Items in backpack" +
+                    "\n\n{0}Name:\t\tAmount:",
+                        Menu.menuIndent);
+
+                /* Sort item list by item name */
+                items.Sort((x, y) => x.name.CompareTo(y.name));
+
+                foreach (Item item in items)
+                {
+                    Console.Write("{0}{1}\t\t{2}\n",
+                        Menu.menuIndent,
+                        item.name,
+                        item.count);
+                }
             }
+
         }
 
+        /* Clear item list */
         public void ClearItems()
         {
+            Console.WriteLine("\n{0}Items cleared!", 
+                Menu.menuIndent); 
             items.Clear();
         }
     }
-
 }

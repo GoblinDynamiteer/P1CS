@@ -204,7 +204,7 @@ namespace exercise02_backpack
                         menuIndent);
                     string addItem = Console.ReadLine();
 
-                    if (addItem != "")
+                    if (addItem != "") // Skip empty inputs
                     {
                         Program.backPack.AddItem(addItem);
                         menuPressAnyKey(
@@ -257,8 +257,7 @@ namespace exercise02_backpack
             /* Check if item name already exists */
             for (int i = 0; i < items.Count; i++)
             {
-                /* Item already in list, increase count
-                 * by one and end function */
+                /* Item already in list, increase count */
                 if (items[i].name == itemName) {
                     items[i].count++;
                     newItem = false;
@@ -278,6 +277,9 @@ namespace exercise02_backpack
         {
             /* Determine if item list is empty */
             bool listEmpty = !items.Any();
+
+            /* Spacing between left and right column,
+             * when listing items and item count*/
             int spacing = 35;
 
             if (listEmpty)
@@ -297,6 +299,7 @@ namespace exercise02_backpack
                 /* Sort item list by item name */
                 items.Sort((x, y) => x.name.CompareTo(y.name));
 
+                /* Print out item names and item count */
                 foreach (Item item in items)
                 {
                     DisplayItemsText(
@@ -321,10 +324,14 @@ namespace exercise02_backpack
             int adjustment)
         {
             adjustment -= a.Length - b.Length;
+
+            /* Format {0,x} right adjust string */
             string bAdjusted = string.Format(
                 "{0," + adjustment + "}", b);
+
             string display = string.Format("{0}{1}{2}",
                 Menu.menuIndent, a, bAdjusted);
+
             Console.WriteLine(display);
         }
 
@@ -351,6 +358,7 @@ namespace exercise02_backpack
         {
             Console.WriteLine("\n{0}Items cleared!", 
                 Menu.menuIndent); 
+
             items.Clear();
         }
     }

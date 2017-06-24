@@ -51,6 +51,7 @@ namespace exercise02_backpack
         public static BackPack backPack = new BackPack();
         static Menu menu = new Menu();
 
+
         static void Main(string[] args)
         {
             /* Endless loop*/
@@ -93,6 +94,7 @@ namespace exercise02_backpack
          * menu item */
         int currentSelection = 0;
 
+
         /* Generate main menu */
         public void ShowMainMenu()
         {
@@ -126,6 +128,7 @@ namespace exercise02_backpack
             /* Display menu help on navigation */
             Console.WriteLine("\n" + menuHelp);
         }
+
 
         /* Navigate the main menu */
         public void Navigate()
@@ -226,6 +229,7 @@ namespace exercise02_backpack
         }
     }
 
+
     /* Items for the backpack */
     public class Item
     {
@@ -233,10 +237,12 @@ namespace exercise02_backpack
         public int count { get; set; }
     }
 
+
     public class BackPack
     {
         /* List of Item class objects */
         static List<Item> items = new List<Item>();
+
 
         /* Add an item to backpack. */
         public void AddItem(string itemName)
@@ -261,6 +267,7 @@ namespace exercise02_backpack
             }
             
         }
+
 
         public void DisplayItems()
         {
@@ -293,6 +300,7 @@ namespace exercise02_backpack
             }
 
         }
+
 
         /* Clear item list */
         public void ClearItems()

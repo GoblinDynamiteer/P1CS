@@ -82,8 +82,8 @@ namespace exercise02_backpack
         public void ShowMainMenu()
         {
             Console.Clear(); // Clear console window
-            Console.Write("\n{0}{1}\n{0}", 
-                menuIndent, 
+            Console.Write("\n{0}{1}\n{0}",
+                menuIndent,
                 menuTitle);
 
             /* Write a nice looking line under menu title */
@@ -92,7 +92,7 @@ namespace exercise02_backpack
                 Console.Write("-");
             }
             Console.WriteLine("\n");
-            
+
 
             /* List menu items */
             for (int i = 0; i < menuItem.Length; i++)
@@ -112,21 +112,78 @@ namespace exercise02_backpack
         /* Navigate the main menu */
         public void Navigate()
         {
-            switch ( Console.ReadKey(true).Key )
+            /* Wait for keypress, get pressed key */
+            ConsoleKeyInfo keyPress = Console.ReadKey(true);
+
+            switch (keyPress.Key)
             {
+                /* Navigate up in menu 
+                 * (or roll over to last item) */
                 case ConsoleKey.UpArrow:
-                    currentSelection = 
+                    currentSelection =
                         (currentSelection - 1 < 0) ?
                         3 : currentSelection - 1;
                     break;
 
+                /* Navigate down in menu 
+                 * (or roll over to item 1) */
                 case ConsoleKey.DownArrow:
-                    currentSelection = 
+                    currentSelection =
                         (currentSelection + 1 < menuItem.Length) ?
                         currentSelection + 1 : 0;
                     break;
 
+                /* Select current selected menu item 
+                 * with enter key */
+                case ConsoleKey.Enter:
+                    MenuAction(currentSelection);
+                    break;
+
+                /* Number keys, goes directly into menu */
+                case ConsoleKey.D1:
+                case ConsoleKey.D2:
+                case ConsoleKey.D3:
+                case ConsoleKey.D4:
+                    /* KeyChar returns actual character 
+                     * from pressed key. 
+                     * Convert to int for MenuAction().
+                     * int.Parse() requires string -- 
+                     * concatenate char with "".
+                     */
+                    MenuAction(
+                    int.Parse("" + keyPress.KeyChar) - 1);
+                    break;
+
                 default:
+                    break;
+            }
+        }
+
+        /* Menu item selection actions */
+        public void MenuAction(int menuItem)
+        {
+            switch (menuItem)
+            {
+                case 0:
+                    Console.Clear();
+                    Console.WriteLine("<ADD ITEM PLACEHOLDER>");
+                    Console.ReadKey(true);
+                    break;
+
+                case 1:
+                    Console.Clear();
+                    Console.WriteLine("<DISPLAY ITEM PLACEHOLDER>");
+                    Console.ReadKey(true);
+                    break;
+
+                case 2:
+                    Console.Clear();
+                    Console.WriteLine("<CLEAR ITEM PLACEHOLDER>");
+                    Console.ReadKey(true);
+                    break;
+
+                case 3: // Quit program
+                    Environment.Exit(0);
                     break;
             }
         }

@@ -260,7 +260,7 @@ namespace exercise02_backpack
                 }
             }
 
-            /* Item was not found, add new with count 1 */
+            /* Item was not found, add new item with count of 1 */
             if (newItem)
             {
                 items.Add(new Item { name = itemName, count = 1 });
@@ -297,8 +297,28 @@ namespace exercise02_backpack
                         item.name,
                         item.count);
                 }
+
+                /* Print out total amount of items */
+                Console.WriteLine("\n{0}Total:\t\t{1}",
+                        Menu.menuIndent, CountItems());
             }
 
+        }
+
+        /* Count total amount of items */
+        private int CountItems()
+        {
+            int sum = 0;
+
+            if (items.Any())
+            {
+                foreach (Item item in items)
+                {
+                    sum += item.count;
+                }
+            }
+            
+            return sum;
         }
 
 

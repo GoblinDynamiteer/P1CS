@@ -79,6 +79,16 @@ namespace exercise02_backpack
             "Quit"
         };
 
+        /* Used with switch statement in 
+         * method MenuAction() */
+        private enum menuItemId
+        {
+            Add,
+            Display,
+            Clear,
+            Quit
+        }
+
         /* Keeps track of currently highlighted 
          * menu item */
         int currentSelection = 0;
@@ -184,7 +194,7 @@ namespace exercise02_backpack
         {
             switch (menuItem)
             {
-                case 0: // Add backpack item
+                case (int)menuItemId.Add:
                     Console.Clear();
                     Console.Write("\n{0}Enter item to add: ", 
                         menuIndent);
@@ -195,19 +205,19 @@ namespace exercise02_backpack
                             addItem));
                     break;
 
-                case 1: // Display backpack items
+                case (int)menuItemId.Display:
                     Console.Clear();
                     Program.backPack.DisplayItems();
                     menuPressAnyKey();
                     break;
 
-                case 2: // Clear backpack items
+                case (int)menuItemId.Clear:
                     Console.Clear();
                     Program.backPack.ClearItems();
                     menuPressAnyKey();
                     break;
 
-                case 3: // Quit program
+                case (int)menuItemId.Quit:
                     Console.Clear();
                     menuPressAnyKey("Program will quit!");
                     Environment.Exit(0);

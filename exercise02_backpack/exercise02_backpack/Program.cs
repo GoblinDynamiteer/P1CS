@@ -51,6 +51,7 @@ namespace exercise02_backpack
         public static BackPack backPack = new BackPack();
         static Menu menu = new Menu();
 
+        
 
         static void Main(string[] args)
         {
@@ -202,10 +203,15 @@ namespace exercise02_backpack
                     Console.Write("\n{0}Enter item to add: ", 
                         menuIndent);
                     string addItem = Console.ReadLine();
-                    Program.backPack.AddItem(addItem);
-                    menuPressAnyKey(
-                        string.Format("Item [{0}] added!", 
-                            addItem));
+
+                    if (addItem != "")
+                    {
+                        Program.backPack.AddItem(addItem);
+                        menuPressAnyKey(
+                            string.Format("Item [{0}] added!",
+                                addItem));
+                    }
+                    
                     break;
 
                 case (int)menuItemId.Display:
@@ -236,7 +242,6 @@ namespace exercise02_backpack
         public string name { get; set; }
         public int count { get; set; }
     }
-
 
     public class BackPack
     {
@@ -273,6 +278,7 @@ namespace exercise02_backpack
         {
             /* Determine if item list is empty */
             bool listEmpty = !items.Any();
+            int spacing = 35;
 
             if (listEmpty)
             {
@@ -283,27 +289,45 @@ namespace exercise02_backpack
 
             else
             {
-                Console.WriteLine("\n{0}Items in backpack" +
-                    "\n\n{0}Name:\t\tAmount:",
-                        Menu.menuIndent);
+                Console.WriteLine("\n{0}Items in backpack", 
+                    Menu.menuIndent);
+                DisplayItemsText("Name:", "Amount:\n", 
+                    spacing);
 
                 /* Sort item list by item name */
                 items.Sort((x, y) => x.name.CompareTo(y.name));
 
                 foreach (Item item in items)
                 {
-                    Console.Write("{0}{1}\t\t{2}\n",
-                        Menu.menuIndent,
-                        item.name,
-                        item.count);
+                    DisplayItemsText(
+                        item.name, 
+                        item.count.ToString(), 
+                        spacing);
                 }
 
                 /* Print out total amount of items */
-                Console.WriteLine("\n{0}Total:\t\t{1}",
-                        Menu.menuIndent, CountItems());
+                Console.WriteLine();
+                DisplayItemsText(
+                    "Total:", 
+                    CountItems().ToString(), 
+                    spacing);
             }
 
         }
+
+        /* Helper method for DisplayItems, 
+        * right adjust string b in a column */
+        private void DisplayItemsText(string a, string b, 
+            int adjustment)
+        {
+            adjustment -= a.Length - b.Length;
+            string bAdjusted = string.Format(
+                "{0," + adjustment + "}", b);
+            string display = string.Format("{0}{1}{2}",
+                Menu.menuIndent, a, bAdjusted);
+            Console.WriteLine(display);
+        }
+
 
         /* Count total amount of items */
         private int CountItems()

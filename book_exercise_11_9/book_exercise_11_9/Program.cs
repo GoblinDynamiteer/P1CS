@@ -1,6 +1,6 @@
 ﻿/* Programmering 1 C# Arbetsbok 
- * Exercise 7.5.5 
- * Page 20
+ * Exercise 11.9
+ * Page 24
  *  
  * Exercise notes: 
  * Redesign the code in example 11.15.

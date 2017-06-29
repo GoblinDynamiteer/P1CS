@@ -9,3 +9,6 @@ Exercises from the book "Programmering 1 C# - Arbetsbok" and exercises from the 
 
 Book - Complex Exercise 2 - "Höja talet!":  
 ![bce2](https://raw.githubusercontent.com/GoblinDynamiteer/P1CS/master/images/screenshots/book_complex_exercise_2.PNG)
+
+Book - Complex Exercise 3 - "Reaktionsspelet":  
+![bce2](https://raw.githubusercontent.com/GoblinDynamiteer/P1CS/master/images/screenshots/book_complex_exercise_3.PNG)

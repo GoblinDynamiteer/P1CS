@@ -3,6 +3,7 @@
  * 
  * Exercise instructions:
  *  -   Debug the program, correct faulty code
+ *  -   Write pseudo code for the program
  *  -   Add runtime exception handling
  *  -   Comment the code, explain your changes and
  *      why the original code was wrong

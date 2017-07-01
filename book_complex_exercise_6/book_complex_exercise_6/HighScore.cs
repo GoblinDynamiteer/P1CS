@@ -124,6 +124,8 @@ namespace Game
             /* Ascending / descending */
             if (descendingSort)
             {
+                /* Reverse sorted list, if largest value
+                 * shall be on top */
                 highScoreList.Reverse();
             }
 

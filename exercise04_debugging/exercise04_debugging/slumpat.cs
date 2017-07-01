@@ -1,4 +1,26 @@
-﻿
+﻿/* Övning 4 - Undantagshantering och felsökning 
+ * Programmering 1
+ * 
+ * Exercise instructions:
+ *  -   Debug the program, correct faulty code
+ *  -   Add runtime exception handling
+ *  -   Comment the code, explain your changes and
+ *      why the original code was wrong
+ *  
+ * Extra:
+ *  -   Allow the user replay the game
+ *  -   Count guesses
+ *  -   High Score list, that saves number of guesses
+ *      between sessions
+ *
+ * Johan Kämpe
+ * 2017-07-01
+ * https://github.com/GoblinDynamiteer/  
+ * https://www.linkedin.com/in/johankampe/  
+ *   
+ */
+
+
 /* Error:
  * The type or namespace name 'system' could not be found
  * 

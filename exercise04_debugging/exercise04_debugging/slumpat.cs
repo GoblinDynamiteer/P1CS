@@ -65,7 +65,7 @@ namespace Uppgift_4
              * lowest first */
             HighScore highscore = new HighScore(10, false);
 
-            /* Load highscore file */
+            /* Load highscore file, if available */
             highscore.Load();
 
             /* Error:
@@ -74,19 +74,22 @@ namespace Uppgift_4
             * 
             * Solution:
             * Pass parameters to randomize between 1 and 20  */
-            
-            int guessCount = 0; // Count guesses
-            bool spela = true;
             int speltal = slumpat.Next(1, 21);
 
+            int guessCount = 0; // Count guesses
+            bool spela = true;
+            
             /* Error:
             * Program doesn't enter while-loop
             * 
             * Solution:
             * Changed !spela -> spela, ! before a bool 
-            * variable means NOT (inverses it) */
+            * variable means NOT (inverts) */
             while (spela)
             {
+                int tal;
+                guessCount++;
+
                 /* 
                 * Runtime error: 
                 * "Input string was not in a correct format." 
@@ -95,8 +98,8 @@ namespace Uppgift_4
                 * Solution: 
                 * Use int.TryParse() instead of Convert.ToInt32(), 
                 * TryParse returns a truth value
-                * depending on if conversion to integer was 
-                * successful, repeat user input until
+                * depending on conversion success - 
+                * repeat user input until
                 * conversion succeeds. 
                 * 
                 * "int tal" is passed as a reference to 
@@ -105,10 +108,6 @@ namespace Uppgift_4
                 * allows the method to change their 
                 * values.
                 */
-
-                int tal;
-                guessCount++;
-
                 do
                 {
                     Console.Write(
@@ -152,17 +151,16 @@ namespace Uppgift_4
 
                     highscore.Print();
 
-                    /* Error:
-                    * Program quit after first guess
-                    * 
-                    * Solution:
-                    * Added curly braces to if-statement, as code block
-                    * was intended to include "spela = false;
-                    */
-
                     Console.WriteLine("\n\tTryck på \"J\" för att spela igen!");
                     if (char.ToLower(Console.ReadKey(true).KeyChar) != 'j')
                     {
+                        /* Error:
+                        * Program quit after first guess
+                        * 
+                        * Solution:
+                        * Added curly braces to if-statement, as code block
+                        * was intended to include "spela = false;
+                        */
                         spela = false;
                     }
 
@@ -242,7 +240,7 @@ namespace Game
         /* Add name and score to list */
         public void Add(string name, int points = 0)
         {
-            if (name == "")
+            if (name == "") // If no name is entered
             {
                 name = "NO NAME";
             }
@@ -251,7 +249,7 @@ namespace Game
             Sort();
         }
 
-        /* Print list, modified for guessing game */
+        /* Print list, modified for this guessing game */
         public void Print()
         {
             Console.WriteLine(

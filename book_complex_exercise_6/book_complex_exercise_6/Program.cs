@@ -50,6 +50,15 @@ namespace book_complex_exercise_6
         {
             HighScore hs = new HighScore(4, true);
 
+            hs.Load();
+            hs.Print();
+
+            hs.Add("Johan", 928);
+
+            hs.Save();
+
+            while (true) ;
+
             hs.Add("JamesTKirk", 132);
             hs.Add("AgentMulder", 120);
             hs.Add("CaptainPicard", 40);
@@ -68,6 +77,8 @@ namespace book_complex_exercise_6
             hs.Add("DonaldDuck", 47);
 
             hs.Print();
+
+            hs.Save(); 
 
             Console.ReadLine();
 

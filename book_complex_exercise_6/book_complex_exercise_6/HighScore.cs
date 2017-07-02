@@ -36,13 +36,19 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace Game
 {
+    [Serializable]
     /* High Score item class */
     class HSItem : IComparable
     {
@@ -61,6 +67,13 @@ namespace Game
             set { points = value; }
         }
 
+        /* Constructor */
+        public HSItem(string name, int points)
+        {
+            this.name = name;
+            this.points = points;
+        }
+
         /* For list sorting */
         public int CompareTo(object obj)
         {
@@ -73,18 +86,13 @@ namespace Game
                 throw new ArgumentException("Object is not Points!");
         }
 
-        /* Constructor */
-        public HSItem(string name, int points)
-        {
-            this.name = name;
-            this.points = points;
-        }
     }
 
     class HighScore
     {
         int maxItems;
         bool descendingSort; // Ascending or descending sort
+        string filename = "highscore.dat";
         List<HSItem> highScoreList;
 
         /* Constructor */
@@ -134,6 +142,64 @@ namespace Game
             {
                 highScoreList.RemoveAt(highScoreList.Count - 1);
             }
+        }
+
+        /* Save high scores to file */
+        public void Save()
+        {
+            FileStream datafile = new FileStream(
+                this.filename, FileMode.Create);
+            BinaryFormatter formatter = new BinaryFormatter();
+
+            try
+            {
+                formatter.Serialize(datafile, highScoreList);
+            }
+            catch (SerializationException e)
+            {
+                Console.WriteLine("Failed to save: " + e.Message);
+                throw;
+            }
+            finally
+            {
+                datafile.Close();
+            }
+        }
+
+        /* Load high scores from file */
+        public void Load()
+        {
+
+            FileStream datafile;
+
+            try
+            {
+                datafile = new FileStream(
+                    this.filename, FileMode.Open);
+            }
+
+            /* If datafile does not exist. */
+            catch (FileNotFoundException e)
+            {
+                Console.WriteLine("No file: " + e.Message);
+                return;
+            }
+
+            try
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+
+                /* Overwrites list if it contains contents */
+                highScoreList = (List<HSItem>)formatter.Deserialize(datafile);
+            }
+            catch (SerializationException e)
+            {
+                Console.WriteLine("Failed to load: " + e.Message);
+                return;
+            }
+
+            datafile.Close();
+
         }
     }
 }

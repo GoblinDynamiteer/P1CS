@@ -24,6 +24,11 @@
  *    the hand in for this exercise doesn't allow multiple
  *    files.
  *    
+ *    I save the highscore data to a file called highscore.dat
+ *    to have score be saved between play sessions.
+ *    As I understand, the file is saved to the same directory
+ *    as the executable.
+ *    
  *    Link to highscore class library exercise solution:
  *    https://github.com/GoblinDynamiteer/P1CS/tree/master/book_complex_exercise_6
  * 
@@ -41,6 +46,7 @@
  * Solution:
  * Changed system -> System,  uppercase S   */
 using System;
+
 using Game; // Highscore class library
 using System.Collections.Generic;
 using System.IO;
@@ -54,7 +60,13 @@ namespace Uppgift_4
         static void Main(string[] args)
         {
             Random slumpat = new Random();
-            HighScore highscore = new HighScore();
+
+            /* New highscore with 10 max items and sorted by
+             * lowest first */
+            HighScore highscore = new HighScore(10, false);
+
+            /* Load highscore file */
+            highscore.Load();
 
             /* Error:
             * Random.Next() without passed parameters
@@ -62,9 +74,10 @@ namespace Uppgift_4
             * 
             * Solution:
             * Pass parameters to randomize between 1 and 20  */
-            int speltal = slumpat.Next(1, 21);
+            
             int guessCount = 0; // Count guesses
             bool spela = true;
+            int speltal = slumpat.Next(1, 21);
 
             /* Error:
             * Program doesn't enter while-loop
@@ -131,10 +144,10 @@ namespace Uppgift_4
                 if (tal == speltal)
                 {
                     Console.WriteLine(
-                        "\tGrattis, du gissade rätt! ({0} antal försök)", 
+                        "\n\tGrattis, du gissade rätt! ({0} antal försök)", 
                             guessCount);
 
-                    Console.Write("Ange ditt namn för highscore: ");
+                    Console.Write("\tAnge ditt namn för highscore: ");
                     highscore.Add(Console.ReadLine(), guessCount);
 
                     highscore.Print();
@@ -144,9 +157,17 @@ namespace Uppgift_4
                     * 
                     * Solution:
                     * Added curly braces to if-statement, as code block
-                    * was include "spela = false;
+                    * was intended to include "spela = false;
                     */
-                    spela = false;
+
+                    Console.WriteLine("\n\tTryck på \"J\" för att spela igen!");
+                    if (char.ToLower(Console.ReadKey(true).KeyChar) != 'j')
+                    {
+                        spela = false;
+                    }
+
+                    /* Randomize new number and reset count */
+                    speltal = slumpat.Next(1, 21);
                     guessCount = 0;
                 }
             }
@@ -154,18 +175,18 @@ namespace Uppgift_4
             /* Save highscores to file */
             highscore.Save();
 
-            /* Added ReadLine to prevent console window from 
-             * closing after winning the game */
-            Console.ReadLine();
         }
     }
 }
 
 namespace Game
 {
+    /* [Serializable] To be able to use 
+     * BinaryFormatter.Serialize, saves/loads HSItem list
+     * to binary data file */
     [Serializable]
     /* High Score item class */
-    class HSItem : IComparable
+    class HSItem : IComparable // IComparable - For sorting
     {
         private string name;
 
@@ -230,17 +251,17 @@ namespace Game
             Sort();
         }
 
-        /* Print list, for testing */
+        /* Print list, modified for guessing game */
         public void Print()
         {
             Console.WriteLine(
-                "******** HIGHSCORE ********");
+                "\n\t******** HIGHSCORE ********");
             int place = 1;
 
             foreach (HSItem score in highScoreList)
             {
                 Console.WriteLine(
-                    "{0}. {1} {2} Gissningar",
+                    "\t{0}. {1} {2} Gissningar",
                         place++, score.Name, score.Points);
             }
         }
@@ -279,7 +300,6 @@ namespace Game
             catch (SerializationException e)
             {
                 Console.WriteLine("Failed to save: " + e.Message);
-                throw;
             }
             finally
             {
@@ -288,10 +308,10 @@ namespace Game
         }
 
         /* Load high scores from file */
-        public void Load()
+        public bool Load()
         {
-
-            FileStream datafile;
+            FileStream datafile = null;
+            bool success = true;
 
             try
             {
@@ -302,24 +322,31 @@ namespace Game
             /* If datafile does not exist. */
             catch (FileNotFoundException e)
             {
-                Console.WriteLine("No file: " + e.Message);
-                return;
+                /* Commented to prevent display of error message
+                 * when no file is found */
+                // Console.WriteLine("No file: " + e.Message);
+                success = false;
             }
 
-            try
+            if (success)
             {
-                BinaryFormatter formatter = new BinaryFormatter();
+                try
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
 
-                /* Overwrites list if it contains contents */
-                highScoreList = (List<HSItem>)formatter.Deserialize(datafile);
-            }
-            catch (SerializationException e)
-            {
-                Console.WriteLine("Failed to load: " + e.Message);
-                return;
-            }
+                    /* Note: Overwrites list if it contains contents */
+                    highScoreList = (List<HSItem>)formatter.Deserialize(datafile);
+                }
+                catch (SerializationException e)
+                {
+                    Console.WriteLine("Failed to load: " + e.Message);
+                    success = false;
+                }
 
-            datafile.Close();
+                datafile.Close();
+            }
+            
+            return success;
 
         }
     }

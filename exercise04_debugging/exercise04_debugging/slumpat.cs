@@ -285,24 +285,40 @@ namespace Game
         }
 
         /* Save high scores to file */
-        public void Save()
+        public bool Save()
         {
-            FileStream datafile = new FileStream(
-                this.filename, FileMode.Create);
-            BinaryFormatter formatter = new BinaryFormatter();
+            FileStream datafile = null;
+            bool success = true;
 
             try
             {
-                formatter.Serialize(datafile, highScoreList);
+                datafile = new FileStream(
+                    this.filename, FileMode.Create);
             }
-            catch (SerializationException e)
+            /* Eg. If write protected */
+            catch (Exception)
             {
-                Console.WriteLine("Failed to save: " + e.Message);
+                success = false;
             }
-            finally
+
+            if (success)
             {
-                datafile.Close();
+                try
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    formatter.Serialize(datafile, highScoreList);
+                }
+                catch (SerializationException e)
+                {
+                    Console.WriteLine("Failed to save: " + e.Message);
+                }
+                finally
+                {
+                    datafile.Close();
+                }
             }
+            
+            return success;
         }
 
         /* Load high scores from file */
@@ -317,8 +333,8 @@ namespace Game
                     this.filename, FileMode.Open);
             }
 
-            /* If datafile does not exist. */
-            catch (FileNotFoundException e)
+            /* If datafile does not exist, or write protected */
+            catch (Exception)
             {
                 /* Commented to prevent display of error message
                  * when no file is found */

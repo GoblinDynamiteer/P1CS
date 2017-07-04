@@ -23,6 +23,23 @@ namespace exercise05_backpack_v2_wpf
         public MainWindow()
         {
             InitializeComponent();
+            textIems.Text = "Empty";
+
+        }
+
+        private void btnClear_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnQuit_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnAdd_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

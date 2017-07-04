@@ -1,0 +1,28 @@
+﻿<Window x:Name="mainWindow" x:Class="exercise05_backpack_v2_wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:exercise05_backpack_v2_wpf"
+        mc:Ignorable="d"
+        Title="BackPack" Height="205.467" Width="530.036">
+    <Grid Margin="0,0,0,16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="71*"/>
+            <ColumnDefinition Width="446*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="107*"/>
+            <RowDefinition Height="212*"/>
+        </Grid.RowDefinitions>
+        
+        <Image Source="img\backpack.jpg" x:Name="backPack" HorizontalAlignment="Left" Height="138" Margin="10,10,0,0" VerticalAlignment="Top" Width="138" Grid.RowSpan="2" Grid.ColumnSpan="2" SnapsToDevicePixels="True" Stretch="Fill"/>
+        <TextBox HorizontalAlignment="Center" Height="53" Margin="71.964,6,97,0" TextWrapping="Wrap" Text="Backpack!" VerticalAlignment="Top" Width="277" FontSize="36" HorizontalContentAlignment="Center" Grid.Column="1"/>
+        <TextBlock x:Name="textIems" HorizontalAlignment="Right" Height="75" Margin="0,30,10,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Width="133" Grid.Column="1" Grid.Row="1"/>
+        <Label Content="Items in backpack:" HorizontalAlignment="Right" Margin="279.964,74,0,0" VerticalAlignment="Top" Grid.Column="1" FontSize="18"/>
+        <Button x:Name="btnAdd" Content="Add item to backpack" HorizontalAlignment="Center" Margin="101,10,171,0" VerticalAlignment="Top" Width="174" Click="btnAdd_CLick" Grid.Column="1" Grid.Row="1"/>
+        <Button x:Name="btnClear" Content="Clear items" HorizontalAlignment="Center" Margin="101,35,171,0" VerticalAlignment="Top" Width="174" Click="btnClear_CLick" Grid.Column="1" Grid.Row="1"/>
+        <Button x:Name="btnQuit" Content="Quit" HorizontalAlignment="Center" Margin="101,60,171,0" VerticalAlignment="Top" Width="174" Click="btnQuit_CLick" Grid.Column="1" Grid.Row="1"/>
+
+    </Grid>
+</Window>

@@ -42,13 +42,13 @@ namespace exercise05_backpack_v2
     public class Menu
     {
         /* Menu text */
-        static string menuTitle = "Backpack v2!";
+        static string menuTitle = "BACKPACK V2!";
+
         public static string menuIndent = "     "; // for text indentation
-        static string menuHelp = string.Format("{0}{1}\n{0}{2}\n{0}{3}",
-            menuIndent,
+        static string [] menuHelp = {
             "Use the up and down arrow keys to navigate!",
             "Use the return key to select a menu item.",
-            "Or press the menu item number to enter menu");
+            "Or press the menu item number to enter menu" };
         static string[] menuItem = {
             "Add an item to the backpack",
             "Display backpack contents",
@@ -57,12 +57,19 @@ namespace exercise05_backpack_v2
             "Quit"
         };
 
-        /* Displays menu text, with options: new line after text, indented, color */
-        public static void DisplayText(string text, bool newLine = true, 
-            bool indent = true, ConsoleColor color = ConsoleColor.White)
-        {
-            ConsoleColor colorNow = Console.ForegroundColor;
+        /* Text colors */
+        public const ConsoleColor colorTitle = ConsoleColor.Cyan;
+        public const ConsoleColor colorHighlighted = ConsoleColor.Green;
+        public const ConsoleColor colorDefault = ConsoleColor.White;
+        public const ConsoleColor colorHelp = ConsoleColor.DarkGray;
+        public const ConsoleColor colorWarning = ConsoleColor.Red;
 
+        /* Displays menu text, with options: 
+         *  new line after text, indented, color */
+        public static void DisplayText(string text, bool newLine = true, 
+            bool indent = true, ConsoleColor color = colorDefault)
+        {
+            /* Set text color */
             Console.ForegroundColor = color;
 
             Console.Write("\n{0}{1}{2}",
@@ -70,18 +77,18 @@ namespace exercise05_backpack_v2
                 text,
                 newLine ? "\n" : "");
 
-            Console.ForegroundColor = colorNow;
+            Console.ForegroundColor = colorDefault;
         }
 
         public static void DisplayTitle()
         {
             Console.Clear();
 
-            DisplayText(menuTitle, false, true, ConsoleColor.Green);
+            DisplayText(menuTitle, false, true, colorTitle);
 
             string line = "";
 
-            /* Print a nice looking line under menu title */
+            /* A nice looking line under menu title */
             for (int i = 0; i < menuTitle.Length; i++)
             {
                 line += "-";
@@ -124,16 +131,23 @@ namespace exercise05_backpack_v2
                 {
                     /* If current selected item, mark by "****"  */
                     DisplayText("**** " + displayText + " ****", 
-                        false, false, ConsoleColor.Green);
-                    continue;
+                        false, false, colorHighlighted);
+
+                    /* continue skips current loop iteration,
+                     * goes to next cycle in loop*/
+                    continue; 
                 }
 
                 DisplayText(displayText, false);
-                
+
             }
 
             /* Display menu help on navigation */
-            Console.WriteLine("\n\n" + menuHelp);
+            Console.WriteLine();
+            foreach (string line in menuHelp)
+            {
+                DisplayText(line, false, true, colorHelp);
+            }
         }
 
 
@@ -287,6 +301,7 @@ namespace exercise05_backpack_v2
             /* Linear search */
             for (int i = 0; i < maxItems; i++)
             {
+                /* String found */
                 if (searchString == (items[i].ToLower()))
                 {
                     Menu.DisplayText(
@@ -308,7 +323,8 @@ namespace exercise05_backpack_v2
             /* Determine if backpack is empty */
             if (itemsAdded == 0)
             {
-                Menu.DisplayText("Backpack is empty!");
+                Menu.DisplayText("Backpack is empty!",
+                    true, true, Menu.colorWarning);
             }
 
             else
@@ -317,7 +333,7 @@ namespace exercise05_backpack_v2
 
                 for (int i = 0; i < itemsAdded; i++)
                 {
-                    Menu.DisplayText(items[i]);
+                    Menu.DisplayText(items[i], false);
                 }
             }
         }

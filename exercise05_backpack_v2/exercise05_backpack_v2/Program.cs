@@ -281,11 +281,12 @@ namespace exercise05_backpack_v2
             while (item == "")
             {
                 Menu.DisplayTitle();
-                Menu.DisplayText("Try Again (Don't enter empy items): ", false);
+                Menu.DisplayText(
+                    "Try Again (Don't enter empty items): ", false);
                 item = Console.ReadLine();
             }
 
-            /* ++var increases var by 1, then uses it's value */
+            /* ++var increases var by 1, then uses its value */
             items[++itemsAdded - 1] = item;
 
         }
@@ -301,8 +302,9 @@ namespace exercise05_backpack_v2
             /* Linear search */
             for (int i = 0; i < maxItems; i++)
             {
-                /* String found */
-                if (searchString == (items[i].ToLower()))
+                /* String found, checking items[i] != null prevents crash */
+                if (items[i] != null && 
+                    searchString == (items[i].ToLower()))
                 {
                     Menu.DisplayText(
                         String.Format("Item found in backpack: {0}", 
@@ -312,7 +314,8 @@ namespace exercise05_backpack_v2
 
             }
 
-            Menu.DisplayText("Item not found in backpack!");
+            Menu.DisplayText("Item not found in backpack!", 
+                false, true, Menu.colorWarning);
         }
 
 
@@ -333,6 +336,14 @@ namespace exercise05_backpack_v2
 
                 for (int i = 0; i < itemsAdded; i++)
                 {
+                    /* Easter egg! */
+                    if (items[i].ToLower() == "banana")
+                    {
+                        Menu.DisplayText(items[i], false, true, 
+                            ConsoleColor.Yellow);
+                        continue;
+                    }
+
                     Menu.DisplayText(items[i], false);
                 }
             }

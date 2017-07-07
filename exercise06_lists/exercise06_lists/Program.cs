@@ -115,27 +115,30 @@ namespace ConsoleApp3
                         break;
 
                     case (int)Meny.Medelvärde:
-                        /* Summera alla tärningsslag */
+                        /* Summera alla värdet i alla tärningsslag */
                         int summa = 0;
                         tärningar.ForEach(tärning => summa += tärning);
 
-                        /* Dela med 1 om tärningar.Count är 0
+                        /* Dela med totalt antal tärningsslag för att 
+                         * få medelvärdet.
+                         * Dela med 1 om tärningar.Count är 0
                          * Förhindrar "delning med 0"-fel */
                         Console.WriteLine("\n\tMedelvärde: {0}", ((float)summa / 
                             (tärningar.Count > 0 ? tärningar.Count : 1)));
                         break;
 
                     case (int)Meny.Rensa:
-                        tärningar.Clear();
+                        tärningar.Clear(); // Clear raderar innehållet i en lista
                         Console.WriteLine("\n\tListan rensad!");
                         break;
 
                     case (int)Meny.Sortera:
+                        /* Sort sorterar en lista, stigande ordning som standard */
                         tärningar.Sort();
                         Console.WriteLine("\n\tListan sorterad!");
                         break;
 
-
+                    /* Listar antal tärningar med det sökta värdet */
                     case (int)Meny.Sök:
                         Console.Write("\n\tAnge värde att söka efter: ");
                         if (int.TryParse(Console.ReadLine(), out int värde))

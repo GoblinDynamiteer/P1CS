@@ -22,13 +22,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace ConsoleApp3
 {
     class Program
     {
-        enum Menu
+        /* För switch-satsen i menyn.
+         * Att använda enum för case-villkoren 
+         * kan göra koden mer läsbar */
+        enum Meny
         {
             Rulla = 1,
             Kolla,
@@ -41,8 +45,20 @@ namespace ConsoleApp3
 
         static int RullaTärning(Random slumpObjekt)
         {   
-            /* Ge slumpat värde mellan 1-7 i retur */
+            /* Ge slumpat värde mellan 1-7 i retur.
+             * Metoden Next tar parametrar för min- 
+             * och max-värde för slumpat tal 
+             * (maxvärdet ej inräknat) */
             return slumpObjekt.Next(1, 7);
+        }
+
+        static int SökTärningVärde(int värde, List<int> lista)
+        {
+            /* ' => ' kallas lambda-operator, används här med metoden
+             * FindAll för att hitta alla tärningar med det sökta värdet, 
+             * Count används sedan för att ge antalet hittade värden
+             * i retur.*/
+            return lista.FindAll(tärning => tärning == värde).Count;
         }
 
         static void Main()
@@ -69,7 +85,7 @@ namespace ConsoleApp3
 
                 switch (val)
                 {
-                    case (int)Menu.Rulla:
+                    case (int)Meny.Rulla:
                         Console.Write("\n\tHur många tärningar vill du rulla: ");
                         bool inmatning = int.TryParse(Console.ReadLine(), out int antal);
 
@@ -82,7 +98,7 @@ namespace ConsoleApp3
                         }
                         break;
 
-                    case (int)Menu.Kolla:
+                    case (int)Meny.Kolla:
                         int newLine = 0;
                         Console.WriteLine("\n\tRullade tärningar: ");
                         foreach (int tärning in tärningar)
@@ -98,27 +114,47 @@ namespace ConsoleApp3
                         Console.WriteLine();
                         break;
 
-                    case (int)Menu.Medelvärde:
-                        Console.Write("\n\tMedelvärde: ");
-
+                    case (int)Meny.Medelvärde:
                         /* Summera alla tärningsslag */
                         int summa = 0;
                         tärningar.ForEach(tärning => summa += tärning);
 
                         /* Dela med 1 om tärningar.Count är 0
                          * Förhindrar "delning med 0"-fel */
-                        Console.WriteLine(((float)summa / 
+                        Console.WriteLine("\n\tMedelvärde: {0}", ((float)summa / 
                             (tärningar.Count > 0 ? tärningar.Count : 1)));
                         break;
 
-                    case (int)Menu.Avsluta:
+                    case (int)Meny.Rensa:
+                        tärningar.Clear();
+                        Console.WriteLine("\n\tListan rensad!");
+                        break;
+
+                    case (int)Meny.Sortera:
+                        tärningar.Sort();
+                        Console.WriteLine("\n\tListan sorterad!");
+                        break;
+
+
+                    case (int)Meny.Sök:
+                        Console.Write("\n\tAnge värde att söka efter: ");
+                        if (int.TryParse(Console.ReadLine(), out int värde))
+                        {
+                            Console.WriteLine("\tHittade {0} st tärningar med " +
+                                "värde {1} i listan!", 
+                                    SökTärningVärde(värde, tärningar), värde);
+                        }
+                        break;
+
+                    case (int)Meny.Avsluta:
                         Console.WriteLine("\n\tTack för att du rullade tärning!");
                         Thread.Sleep(1000);
                         kör = false;
                         break;
 
                     default:
-                        Console.WriteLine("\n\tVälj 1-3 från menyn.");
+                        Console.WriteLine("\n\tVälj {0}-{1} från menyn.",
+                            (int)Meny.Rulla, (int)Meny.Avsluta);
                         break;
                 }
             }

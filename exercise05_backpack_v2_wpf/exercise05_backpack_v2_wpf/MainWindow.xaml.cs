@@ -27,19 +27,5 @@ namespace exercise05_backpack_v2_wpf
 
         }
 
-        private void btnClear_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void btnQuit_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void btnAdd_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

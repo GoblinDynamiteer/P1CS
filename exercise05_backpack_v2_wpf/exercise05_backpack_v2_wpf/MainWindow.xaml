@@ -20,9 +20,6 @@
         <TextBox HorizontalAlignment="Center" Height="53" Margin="71.964,6,97,0" TextWrapping="Wrap" Text="Backpack!" VerticalAlignment="Top" Width="277" FontSize="36" HorizontalContentAlignment="Center" Grid.Column="1"/>
         <TextBlock x:Name="textIems" HorizontalAlignment="Right" Height="75" Margin="0,30,10,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Width="133" Grid.Column="1" Grid.Row="1"/>
         <Label Content="Items in backpack:" HorizontalAlignment="Right" Margin="279.964,74,0,0" VerticalAlignment="Top" Grid.Column="1" FontSize="18"/>
-        <Button x:Name="btnAdd" Content="Add item to backpack" HorizontalAlignment="Center" Margin="101,10,171,0" VerticalAlignment="Top" Width="174" Click="btnAdd_CLick" Grid.Column="1" Grid.Row="1"/>
-        <Button x:Name="btnClear" Content="Clear items" HorizontalAlignment="Center" Margin="101,35,171,0" VerticalAlignment="Top" Width="174" Click="btnClear_CLick" Grid.Column="1" Grid.Row="1"/>
-        <Button x:Name="btnQuit" Content="Quit" HorizontalAlignment="Center" Margin="101,60,171,0" VerticalAlignment="Top" Width="174" Click="btnQuit_CLick" Grid.Column="1" Grid.Row="1"/>
-
+       
     </Grid>
 </Window>

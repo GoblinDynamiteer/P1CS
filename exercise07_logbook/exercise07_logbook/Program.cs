@@ -54,14 +54,14 @@ namespace exercise07_logbook
         int[] searchHits;
         int id = 0;
 
-        enum Searchdata
+        enum SearchData
         {
             Empty = -1,
             MaxHits = 50
         }
 
         /* Entry string indexes */
-        enum Entry
+        enum EntryData
         {
             Title,
             Content,
@@ -90,16 +90,16 @@ namespace exercise07_logbook
             /* List of string vectors, for holding logbook entries */
             entries = new List<string[]>();
 
-            searchHits = new int[(int)Searchdata.MaxHits];
+            searchHits = new int[(int)SearchData.MaxHits];
             ClearSearchHits();
         }
 
         /* Clear search hit list */
         void ClearSearchHits()
         {
-            for (int i = 0; i < (int)Searchdata.MaxHits; i++)
+            for (int i = 0; i < (int)SearchData.MaxHits; i++)
             {
-                searchHits[i] = (int)Searchdata.Empty;
+                searchHits[i] = (int)SearchData.Empty;
             }
         }
 
@@ -113,16 +113,16 @@ namespace exercise07_logbook
             foreach (string[] entry in entries)
             {
                 /* Max hits found, break */
-                if (hits == (int)Searchdata.MaxHits)
+                if (hits == (int)SearchData.MaxHits)
                 {
                     break;
                 }
 
-                if (entry[(int)Entry.Content].Contains(searchString) ||
-                    entry[(int)Entry.Title].Contains(searchString))
+                if (entry[(int)EntryData.Content].Contains(searchString) ||
+                    entry[(int)EntryData.Title].Contains(searchString))
                 {
                     /* Add entry index to search hits array */
-                    searchHits[hits++] = int.Parse(entry[(int)Entry.ID]);
+                    searchHits[hits++] = int.Parse(entry[(int)EntryData.ID]);
                 }
             }
 
@@ -132,15 +132,15 @@ namespace exercise07_logbook
         /* Display entries stored in searchHits array */
         public void DisplaySearchHits()
         {
-            for (int i = 0; i < (int)Searchdata.MaxHits; i++)
+            for (int i = 0; i < (int)SearchData.MaxHits; i++)
             {
-                if (searchHits[i] == (int)Searchdata.Empty)
+                if (searchHits[i] == (int)SearchData.Empty)
                 {
                     break;
                 }
 
                 Console.WriteLine(
-                    entries[searchHits[i]][(int)Entry.Title]);
+                    entries[searchHits[i]][(int)EntryData.Title]);
             }
         }
 
@@ -154,10 +154,10 @@ namespace exercise07_logbook
 
             /* Add logbook entry contents to string array */
             string[] stringEntry = new string[4];
-            stringEntry[(int)Entry.Title] = title;
-            stringEntry[(int)Entry.ID] = id++.ToString();
-            stringEntry[(int)Entry.Date] = DateTime.Now.ToString();
-            stringEntry[(int)Entry.Content] = content;
+            stringEntry[(int)EntryData.Title] = title;
+            stringEntry[(int)EntryData.ID] = id++.ToString();
+            stringEntry[(int)EntryData.Date] = DateTime.Now.ToString();
+            stringEntry[(int)EntryData.Content] = content;
 
             /* Add string array to list */
             entries.Add(stringEntry);
@@ -169,7 +169,7 @@ namespace exercise07_logbook
         public void DisplayEntry(int id)
         {
             /* Search for list index */
-            int index = findEntryIndex(id);
+            int index = FindEntryIndex(id);
 
             if (index == -1) // Error
             {
@@ -178,17 +178,17 @@ namespace exercise07_logbook
             }
 
             Console.WriteLine("-------------------------------");
-            Console.WriteLine(entries[index][(int)Entry.Title]);
-            Console.WriteLine(entries[index][(int)Entry.Date]);
+            Console.WriteLine(entries[index][(int)EntryData.Title]);
+            Console.WriteLine(entries[index][(int)EntryData.Date]);
             Console.WriteLine("-------------------------------");
-            Console.WriteLine(entries[index][(int)Entry.Content]);
+            Console.WriteLine(entries[index][(int)EntryData.Content]);
         }
 
         /* Edit entry Title */
         public void EditTitle(int id)
         {
             /* Search for list index */
-            int index = findEntryIndex(id);
+            int index = FindEntryIndex(id);
 
             if (index == -1) // Error
             {
@@ -206,7 +206,7 @@ namespace exercise07_logbook
         public void EditContent(int id)
         {
             /* Search for list index */
-            int index = findEntryIndex(id);
+            int index = FindEntryIndex(id);
 
             if (index == -1) // Error
             {
@@ -224,7 +224,7 @@ namespace exercise07_logbook
         public void EditDate(int id)
         {
             /* Search for list index */
-            int index = findEntryIndex(id);
+            int index = FindEntryIndex(id);
 
             if (index == -1) // Error
             {
@@ -242,24 +242,24 @@ namespace exercise07_logbook
         void UpdateEntry(int index, string title = "", string content = "", string date = "")
         {
             /* Update entry content that needs updating */
-            entries[index][(int)Entry.Title] = title == "" ? 
-                entries[index][(int)Entry.Title] : title;
-            entries[index][(int)Entry.Content] = content == "" ? 
-                entries[index][(int)Entry.Content] : content;
-            entries[index][(int)Entry.Date] = date == "" ? 
-                entries[index][(int)Entry.Date] : date;
+            entries[index][(int)EntryData.Title] = title == "" ? 
+                entries[index][(int)EntryData.Title] : title;
+            entries[index][(int)EntryData.Content] = content == "" ? 
+                entries[index][(int)EntryData.Content] : content;
+            entries[index][(int)EntryData.Date] = date == "" ? 
+                entries[index][(int)EntryData.Date] : date;
         }
 
         /* Find entry list index from id */
-        int findEntryIndex(int id)
+        int FindEntryIndex(int id)
         {
             int retval = -1; // Return -1 if id not found
             for (int i = 0; i < entries.Count; i++)
             {
-                if (entries[i][(int)Entry.ID] == id.ToString())
+                if (entries[i][(int)EntryData.ID] == id.ToString())
                 {
                     /* Parsing error -- display error message */
-                    if(!int.TryParse(entries[i][(int)Entry.ID], out retval))
+                    if(!int.TryParse(entries[i][(int)EntryData.ID], out retval))
                     {
                         Console.WriteLine(
                             errorMsg[(int)ErrorId.IDToIndexConvertFail]);

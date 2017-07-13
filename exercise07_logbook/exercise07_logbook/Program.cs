@@ -33,18 +33,105 @@ namespace exercise07_logbook
 {
     class Program
     {
+
+        enum MenuItem
+        {
+            Add,
+            ListAll,
+            Search,
+            Quit
+        }
+
         static void Main(string[] args)
         {
             Logbook logbook = new Logbook();
-            logbook.AddEntry("Jag är en Apa", "Titel 1");
-            logbook.AddEntry("Jag är en Banan", "Titel 2");
-            logbook.AddEntry("Jag är en Gris", "Titel 3");
-            logbook.AddEntry("Jag är ett Äpple!!", "Titel 4");
-            int hittade = logbook.Search("Jag är e");
-            Console.WriteLine("Hittade {0} poster: ", hittade);
-            logbook.DisplaySearchHits();
+            logbook.AddEntry("A day at the zoo!", "I went to the " +
+                "zoo with my family today, we saw monkies and giraffes!!");
+            logbook.AddEntry("Today's lunch", "I had pancakes with whipped " +
+                "cream and strawberry jam today!");
+
+            logbook.DisplayAllEntries();
+
+            Console.ReadLine();
+
+            int userChoice = 0;
+
+            while (userChoice != (int)MenuItem.Quit)
+            {
+                userChoice = MenuDisplay();
+
+                switch (userChoice)
+                {
+                    case (int)MenuItem.Add:
+                        logbook.AddEntry();
+                        break;
+
+                    case (int)MenuItem.ListAll:
+                        logbook.DisplayAllEntries();
+                        break;
+
+                    case (int)MenuItem.Search:
+                        int hits = logbook.Search();
+                        Console.WriteLine("Found {0} entries: ", hits);
+                        logbook.DisplaySearchHits();
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            Console.WriteLine("Thanks for using logbook!");
             Console.ReadLine();
         }
+
+        /* Display the main menu for the logbook */
+        static int MenuDisplay()
+        {
+            string[] menuItems =
+            {
+                "Add logbook entry",
+                "List all logbook entries",
+                "Search",
+                "Quit"
+            };
+
+            Console.Clear();
+
+            for (int i = 0; i < menuItems.Length; i++)
+            {
+                Console.WriteLine("[{0}] {1}", i+1, menuItems[i]);
+            }
+
+            Console.Write("Press key: ");
+            ConsoleKeyInfo keyPress = Console.ReadKey(true);
+
+            switch (keyPress.Key)
+            {
+                case ConsoleKey.NumPad1:
+                case ConsoleKey.D1:
+                    Console.WriteLine("OK1!!!!");
+                    return (int)MenuItem.Add;
+
+                case ConsoleKey.NumPad2:
+                case ConsoleKey.D2:
+                    Console.WriteLine("OK!!!!");
+                    return (int)MenuItem.ListAll;
+
+                case ConsoleKey.NumPad3:
+                case ConsoleKey.D3:
+                    return (int)MenuItem.Search;
+
+                case ConsoleKey.NumPad4:
+                case ConsoleKey.D4:
+                    return (int)MenuItem.Quit;
+
+                default:
+                    return -1;
+            }
+
+        }
+
     }
 
     /* Class for logbooks */
@@ -53,6 +140,8 @@ namespace exercise07_logbook
         List<string[]> entries;
         int[] searchHits;
         int id = 0;
+        string line = "-------------------------------------------";
+
 
         enum SearchData
         {
@@ -129,6 +218,14 @@ namespace exercise07_logbook
             return hits;
         }
 
+        /* Search entries, manual input, returns hits */
+        public int Search()
+        {
+            Console.WriteLine("Enter search string: ");
+            string search = Console.ReadLine();
+            return Search(search);
+        }
+
         /* Display entries stored in searchHits array */
         public void DisplaySearchHits()
         {
@@ -139,19 +236,35 @@ namespace exercise07_logbook
                     break;
                 }
 
-                Console.WriteLine(
-                    entries[searchHits[i]][(int)EntryData.Title]);
+                DisplayTitle(int.Parse(entries[searchHits[i]][(int)EntryData.ID]));
             }
+
+            Console.ReadKey(true);
         }
 
-        /* Add entry to logbook */
-        public int AddEntry(string content, string title = "Untitled")
+        /* Display all log entries */
+        public void DisplayAllEntries()
         {
-            if (content == "") // Error
+            foreach (string[] entry in entries)
             {
-                Console.WriteLine(errorMsg[(int)ErrorId.BlankEntry]);
+                DisplayTitle(int.Parse(entry[(int)EntryData.ID]));
             }
 
+            Console.WriteLine(""); //FIXA
+        }
+
+        void DisplayTitle(int id)
+        {
+            int index = FindEntryIndex(id);
+            string entryId = entries[index][(int)EntryData.ID];
+            string entryTitle = entries[index][(int)EntryData.Title];
+
+            Console.WriteLine("[{0}] [{1}]", entryId, entryTitle);
+        }
+
+        /* Add entry to logbook, with passed parameters */
+        public int AddEntry(string title, string content)
+        {
             /* Add logbook entry contents to string array */
             string[] stringEntry = new string[4];
             stringEntry[(int)EntryData.Title] = title;
@@ -163,6 +276,34 @@ namespace exercise07_logbook
             entries.Add(stringEntry);
 
             return id - 1;
+        }
+
+        /* Add entry to logbook, manual input */
+        public void AddEntry()
+        {
+            string title, content;
+            Console.Clear();
+            Console.WriteLine(line);
+            Console.WriteLine("New logbook entry");
+            Console.WriteLine(line);
+            
+            Console.Write("Enter title for new entry: ");
+            title = Console.ReadLine();
+
+            /* Set title to "Untitled entry" if empty input */
+            title = title == "" ? "Untitled entry" : title;
+
+            Console.WriteLine("Enter text for new entry: ");
+            content = Console.ReadLine();
+
+            while (content == "")
+            {
+                Console.WriteLine(errorMsg[(int)ErrorId.BlankEntry]);
+                Console.WriteLine("Enter text for new entry: ");
+                content = Console.ReadLine();
+            }
+
+            AddEntry(title, content);
         }
 
         /* Display a log entry, pass id as parameter */
@@ -177,11 +318,36 @@ namespace exercise07_logbook
                 return;
             }
 
-            Console.WriteLine("-------------------------------");
+            /* Text output */
+            Console.WriteLine(line);
             Console.WriteLine(entries[index][(int)EntryData.Title]);
             Console.WriteLine(entries[index][(int)EntryData.Date]);
-            Console.WriteLine("-------------------------------");
+            Console.WriteLine(line);
             Console.WriteLine(entries[index][(int)EntryData.Content]);
+            Console.WriteLine(line);
+            Console.WriteLine("Options:\n(E)xport | Edit (T)itle | Edit (C)ontent\n" +
+                "Press any other key to return to main menu. ");
+
+            ConsoleKeyInfo keyPress = Console.ReadKey(true);
+
+            switch (keyPress.Key)
+            {
+                case ConsoleKey.E:
+                    Console.WriteLine("TEMP EXPORT");
+                    break;
+
+                case ConsoleKey.T:
+                    EditTitle(id);
+                    break;
+
+                case ConsoleKey.C:
+                    EditContent(id);
+                    break;
+
+                default:
+                    break;
+            }
+
         }
 
         /* Edit entry Title */
@@ -220,34 +386,16 @@ namespace exercise07_logbook
             UpdateEntry(index, "", newContent);
         }
 
-        /* FIXA DATUM !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
-        public void EditDate(int id)
-        {
-            /* Search for list index */
-            int index = FindEntryIndex(id);
-
-            if (index == -1) // Error
-            {
-                Console.WriteLine(errorMsg[(int)ErrorId.EntryIDNotFound]);
-                return;
-            }
-
-            Console.WriteLine("Enter new date: ");
-            string newDate = Console.ReadLine();
-
-            UpdateEntry(index, "", "", newDate);
-        }
-
         /* Edit entry -- Only non blank parameters are updated */
-        void UpdateEntry(int index, string title = "", string content = "", string date = "")
+        void UpdateEntry(int index, string title = "", string content = "")
         {
             /* Update entry content that needs updating */
             entries[index][(int)EntryData.Title] = title == "" ? 
                 entries[index][(int)EntryData.Title] : title;
             entries[index][(int)EntryData.Content] = content == "" ? 
                 entries[index][(int)EntryData.Content] : content;
-            entries[index][(int)EntryData.Date] = date == "" ? 
-                entries[index][(int)EntryData.Date] : date;
+            /* entries[index][(int)EntryData.Date] = date == "" ? 
+                entries[index][(int)EntryData.Date] : date; */ //STRUNTA I ATT ÄNDRA DATUM!
         }
 
         /* Find entry list index from id */

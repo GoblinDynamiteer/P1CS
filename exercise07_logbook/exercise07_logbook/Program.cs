@@ -20,7 +20,7 @@
  *   - Create one or several methods
  *  
  * Johan Kämpe
- * 2017-07-12
+ * 2017-07-13
  * https://github.com/GoblinDynamiteer/  
  * https://www.linkedin.com/in/johankampe/  
  *   
@@ -33,7 +33,7 @@ namespace exercise07_logbook
 {
     class Program
     {
-
+        /* Enums for menu selection */
         enum MenuItem
         {
             Add,
@@ -45,17 +45,15 @@ namespace exercise07_logbook
         static void Main(string[] args)
         {
             Logbook logbook = new Logbook();
+
+            /* Add some sample entries */
             logbook.AddEntry("A day at the zoo!", "I went to the " +
                 "zoo with my family today, we saw monkies and giraffes!!");
             logbook.AddEntry("Today's lunch", "I had pancakes with whipped " +
                 "cream and strawberry jam today!");
 
-            logbook.DisplayAllEntries();
 
-            Console.ReadLine();
-
-            int userChoice = 0;
-
+            int userChoice = 0; // User meny choice
             while (userChoice != (int)MenuItem.Quit)
             {
                 userChoice = MenuDisplay();
@@ -81,8 +79,10 @@ namespace exercise07_logbook
                 }
             }
 
-            Console.WriteLine("Thanks for using logbook!");
-            Console.ReadLine();
+            Console.Clear();
+            Console.WriteLine("Thanks for using the logbook!\n" +
+                "Press any key to quit...");
+            Console.ReadKey(true);
         }
 
         /* Display the main menu for the logbook */
@@ -103,19 +103,17 @@ namespace exercise07_logbook
                 Console.WriteLine("[{0}] {1}", i+1, menuItems[i]);
             }
 
-            Console.Write("Press key: ");
+            Console.Write("Press key to select menu: ");
             ConsoleKeyInfo keyPress = Console.ReadKey(true);
 
             switch (keyPress.Key)
             {
                 case ConsoleKey.NumPad1:
                 case ConsoleKey.D1:
-                    Console.WriteLine("OK1!!!!");
                     return (int)MenuItem.Add;
 
                 case ConsoleKey.NumPad2:
                 case ConsoleKey.D2:
-                    Console.WriteLine("OK!!!!");
                     return (int)MenuItem.ListAll;
 
                 case ConsoleKey.NumPad3:
@@ -129,6 +127,19 @@ namespace exercise07_logbook
                 default:
                     return -1;
             }
+
+        }
+
+        void MenuTitle(string text)
+        {
+            int lineLenght = 10;
+
+            for (int i = 0; i < lineLenght; i++)
+            {
+                Console.Write("-");
+            }
+
+            Console.WriteLine(text);
 
         }
 
@@ -162,7 +173,8 @@ namespace exercise07_logbook
         string[] errorMsg = {
             "Error: Could not convert log entry id to integer!",
             "Error: Entry ID not found!",
-            "Error: Entry text cannot be blank!"
+            "Error: Entry text cannot be blank!",
+            "Error: Faulty ID integer input!"
         };
 
         /* Indexes for error messages */
@@ -170,7 +182,8 @@ namespace exercise07_logbook
         {
             IDToIndexConvertFail,
             EntryIDNotFound,
-            BlankEntry
+            BlankEntry,
+            FaultyIntInput
         }
         
         /* Constructor */
@@ -229,6 +242,7 @@ namespace exercise07_logbook
         /* Display entries stored in searchHits array */
         public void DisplaySearchHits()
         {
+            Console.WriteLine("ID\tDate\t\t\tTitle");
             for (int i = 0; i < (int)SearchData.MaxHits; i++)
             {
                 if (searchHits[i] == (int)SearchData.Empty)
@@ -245,21 +259,26 @@ namespace exercise07_logbook
         /* Display all log entries */
         public void DisplayAllEntries()
         {
+            Console.WriteLine("All entries");
+            Console.WriteLine(line);
+
+            Console.WriteLine("ID\tDate\t\t\tTitle");
             foreach (string[] entry in entries)
             {
                 DisplayTitle(int.Parse(entry[(int)EntryData.ID]));
             }
 
-            Console.WriteLine(""); //FIXA
+            Console.ReadKey(true);
         }
 
+        /* List title with id */
         void DisplayTitle(int id)
         {
             int index = FindEntryIndex(id);
             string entryId = entries[index][(int)EntryData.ID];
             string entryTitle = entries[index][(int)EntryData.Title];
-
-            Console.WriteLine("[{0}] [{1}]", entryId, entryTitle);
+            string entryDate = entries[index][(int)EntryData.Date];
+            Console.WriteLine("[{0}]\t[{1}]\t[{2}] ", entryId, entryDate, entryTitle);
         }
 
         /* Add entry to logbook, with passed parameters */
@@ -274,6 +293,9 @@ namespace exercise07_logbook
 
             /* Add string array to list */
             entries.Add(stringEntry);
+
+            Console.WriteLine("Added new entry: ");
+            DisplayTitle(id-1);
 
             return id - 1;
         }
@@ -306,6 +328,24 @@ namespace exercise07_logbook
             AddEntry(title, content);
         }
 
+        /* Delete entry */
+        public void DeleteEntry(int id)
+        {
+            entries.RemoveAt(id);
+            Console.WriteLine("Entry with id {0} deleted!", id);
+        }
+
+        public void DisplayEntry()
+        {
+            Console.Write("Enter entry ID: ");
+            string stringID = Console.ReadLine();
+
+            if (!int.TryParse(stringID, out int id))
+            {
+                Console.WriteLine(errorMsg[(int)ErrorId.FaultyIntInput]);
+            }
+        }
+
         /* Display a log entry, pass id as parameter */
         public void DisplayEntry(int id)
         {
@@ -325,7 +365,7 @@ namespace exercise07_logbook
             Console.WriteLine(line);
             Console.WriteLine(entries[index][(int)EntryData.Content]);
             Console.WriteLine(line);
-            Console.WriteLine("Options:\n(E)xport | Edit (T)itle | Edit (C)ontent\n" +
+            Console.WriteLine("Options:\n(E)xport | Change (T)itle | Change (C)ontent | (D)elete\n" +
                 "Press any other key to return to main menu. ");
 
             ConsoleKeyInfo keyPress = Console.ReadKey(true);
@@ -342,6 +382,15 @@ namespace exercise07_logbook
 
                 case ConsoleKey.C:
                     EditContent(id);
+                    break;
+
+                case ConsoleKey.D:
+                    Console.Write(
+                        "Are you sure? Press (Y) to delete entry: ");
+                    if (Console.ReadKey(true).Key == ConsoleKey.Y)
+                    {
+                        DeleteEntry(id);
+                    }
                     break;
 
                 default:
@@ -394,8 +443,6 @@ namespace exercise07_logbook
                 entries[index][(int)EntryData.Title] : title;
             entries[index][(int)EntryData.Content] = content == "" ? 
                 entries[index][(int)EntryData.Content] : content;
-            /* entries[index][(int)EntryData.Date] = date == "" ? 
-                entries[index][(int)EntryData.Date] : date; */ //STRUNTA I ATT ÄNDRA DATUM!
         }
 
         /* Find entry list index from id */

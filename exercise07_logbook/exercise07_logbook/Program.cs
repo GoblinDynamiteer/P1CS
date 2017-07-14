@@ -33,15 +33,6 @@ namespace exercise07_logbook
 {
     class Program
     {
-        /* Enums for menu selection */
-        enum MenuItem
-        {
-            Add,
-            ListAll,
-            Search,
-            Quit
-        }
-
         static void Main(string[] args)
         {
             Logbook logbook = new Logbook();
@@ -52,26 +43,33 @@ namespace exercise07_logbook
             logbook.AddEntry("Today's lunch", "I had pancakes with whipped " +
                 "cream and strawberry jam today!");
 
-
             int userChoice = 0; // User meny choice
-            while (userChoice != (int)MenuItem.Quit)
+            while (userChoice != (int)Menu.MenuItem.Quit)
             {
-                userChoice = MenuDisplay();
+                userChoice = Menu.DisplayMenu();
 
                 switch (userChoice)
                 {
-                    case (int)MenuItem.Add:
+                    case (int)Menu.MenuItem.Add:
+                        Menu.DisplayTitle("Add log entry");
                         logbook.AddEntry();
                         break;
 
-                    case (int)MenuItem.ListAll:
+                    case (int)Menu.MenuItem.ListAll:
+                        Menu.DisplayTitle("All logbook entries");
                         logbook.DisplayAllEntries();
                         break;
 
-                    case (int)MenuItem.Search:
+                    case (int)Menu.MenuItem.Search:
+                        Menu.DisplayTitle("Search entries");
                         int hits = logbook.Search();
-                        Console.WriteLine("Found {0} entries: ", hits);
-                        logbook.DisplaySearchHits();
+                        Menu.DisplayTitle(
+                            String.Format("Found {0} items!", hits));
+                        if (hits > 0)
+                        {
+                            logbook.DisplaySearchHits();
+                        }
+                        
                         break;
 
                     default:
@@ -80,67 +78,9 @@ namespace exercise07_logbook
             }
 
             Console.Clear();
-            Console.WriteLine("Thanks for using the logbook!\n" +
+            Menu.Wait("Thanks for using the logbook!\n" +
                 "Press any key to quit...");
             Console.ReadKey(true);
-        }
-
-        /* Display the main menu for the logbook */
-        static int MenuDisplay()
-        {
-            string[] menuItems =
-            {
-                "Add logbook entry",
-                "List all logbook entries",
-                "Search",
-                "Quit"
-            };
-
-            Console.Clear();
-
-            for (int i = 0; i < menuItems.Length; i++)
-            {
-                Console.WriteLine("[{0}] {1}", i+1, menuItems[i]);
-            }
-
-            Console.Write("Press key to select menu: ");
-            ConsoleKeyInfo keyPress = Console.ReadKey(true);
-
-            switch (keyPress.Key)
-            {
-                case ConsoleKey.NumPad1:
-                case ConsoleKey.D1:
-                    return (int)MenuItem.Add;
-
-                case ConsoleKey.NumPad2:
-                case ConsoleKey.D2:
-                    return (int)MenuItem.ListAll;
-
-                case ConsoleKey.NumPad3:
-                case ConsoleKey.D3:
-                    return (int)MenuItem.Search;
-
-                case ConsoleKey.NumPad4:
-                case ConsoleKey.D4:
-                    return (int)MenuItem.Quit;
-
-                default:
-                    return -1;
-            }
-
-        }
-
-        void MenuTitle(string text)
-        {
-            int lineLenght = 10;
-
-            for (int i = 0; i < lineLenght; i++)
-            {
-                Console.Write("-");
-            }
-
-            Console.WriteLine(text);
-
         }
 
     }
@@ -152,7 +92,6 @@ namespace exercise07_logbook
         int[] searchHits;
         int id = 0;
         string line = "-------------------------------------------";
-
 
         enum SearchData
         {
@@ -174,7 +113,7 @@ namespace exercise07_logbook
             "Error: Could not convert log entry id to integer!",
             "Error: Entry ID not found!",
             "Error: Entry text cannot be blank!",
-            "Error: Faulty ID integer input!"
+            "Error: Faulty ID input!"
         };
 
         /* Indexes for error messages */
@@ -234,7 +173,7 @@ namespace exercise07_logbook
         /* Search entries, manual input, returns hits */
         public int Search()
         {
-            Console.WriteLine("Enter search string: ");
+            Console.Write("Enter search string: ");
             string search = Console.ReadLine();
             return Search(search);
         }
@@ -242,7 +181,7 @@ namespace exercise07_logbook
         /* Display entries stored in searchHits array */
         public void DisplaySearchHits()
         {
-            Console.WriteLine("ID\tDate\t\t\tTitle");
+            Console.WriteLine("ID\tDATE\t\t\tTITLE");
             for (int i = 0; i < (int)SearchData.MaxHits; i++)
             {
                 if (searchHits[i] == (int)SearchData.Empty)
@@ -253,22 +192,19 @@ namespace exercise07_logbook
                 DisplayTitle(int.Parse(entries[searchHits[i]][(int)EntryData.ID]));
             }
 
-            Console.ReadKey(true);
+            Console.WriteLine();
+            DisplayEntry();
         }
 
         /* Display all log entries */
         public void DisplayAllEntries()
         {
-            Console.WriteLine("All entries");
-            Console.WriteLine(line);
+            Console.WriteLine("ID\tDATE\t\t\tTITLE");
 
-            Console.WriteLine("ID\tDate\t\t\tTitle");
-            foreach (string[] entry in entries)
-            {
-                DisplayTitle(int.Parse(entry[(int)EntryData.ID]));
-            }
+            entries.ForEach(entry => DisplayTitle(int.Parse(entry[(int)EntryData.ID])));
 
-            Console.ReadKey(true);
+            Console.WriteLine();
+            DisplayEntry();
         }
 
         /* List title with id */
@@ -304,11 +240,6 @@ namespace exercise07_logbook
         public void AddEntry()
         {
             string title, content;
-            Console.Clear();
-            Console.WriteLine(line);
-            Console.WriteLine("New logbook entry");
-            Console.WriteLine(line);
-            
             Console.Write("Enter title for new entry: ");
             title = Console.ReadLine();
 
@@ -343,7 +274,11 @@ namespace exercise07_logbook
             if (!int.TryParse(stringID, out int id))
             {
                 Console.WriteLine(errorMsg[(int)ErrorId.FaultyIntInput]);
+                Menu.Wait();
+                return;
             }
+
+            DisplayEntry(id);
         }
 
         /* Display a log entry, pass id as parameter */
@@ -355,6 +290,7 @@ namespace exercise07_logbook
             if (index == -1) // Error
             {
                 Console.WriteLine(errorMsg[(int)ErrorId.EntryIDNotFound]);
+                Menu.Wait();
                 return;
             }
 
@@ -385,9 +321,8 @@ namespace exercise07_logbook
                     break;
 
                 case ConsoleKey.D:
-                    Console.Write(
-                        "Are you sure? Press (Y) to delete entry: ");
-                    if (Console.ReadKey(true).Key == ConsoleKey.Y)
+                    if (Menu.Confirm("Are you sure? Press (Y) " +
+                        "to delete entry: ", 'Y'))
                     {
                         DeleteEntry(id);
                     }
@@ -453,18 +388,115 @@ namespace exercise07_logbook
             {
                 if (entries[i][(int)EntryData.ID] == id.ToString())
                 {
-                    /* Parsing error -- display error message */
-                    if(!int.TryParse(entries[i][(int)EntryData.ID], out retval))
-                    {
-                        Console.WriteLine(
-                            errorMsg[(int)ErrorId.IDToIndexConvertFail]);
-                    }
-
-                    break;
+                    retval = i;
                 }
             }
 
             return retval;
         }
     }
+
+    class Menu
+    {
+        /* Enums for menu selection */
+        public enum MenuItem
+        {
+            Add,
+            ListAll,
+            Search,
+            Quit
+        }
+
+        /* Display the main menu for the logbook */
+        static public int DisplayMenu()
+        {
+
+            string[] menuItems =
+            {
+                "Add logbook entry",
+                "List all logbook entries",
+                "Search",
+                "Quit"
+            };
+
+            Console.Clear();
+            DisplayTitle();
+
+            for (int i = 0; i < menuItems.Length; i++)
+            {
+                Console.WriteLine("[{0}] {1}", i + 1, menuItems[i]);
+            }
+
+            Console.Write("Press key to select menu: ");
+            ConsoleKeyInfo keyPress = Console.ReadKey(true);
+
+            switch (keyPress.Key)
+            {
+                case ConsoleKey.NumPad1:
+                case ConsoleKey.D1:
+                    return (int)MenuItem.Add;
+
+                case ConsoleKey.NumPad2:
+                case ConsoleKey.D2:
+                    return (int)MenuItem.ListAll;
+
+                case ConsoleKey.NumPad3:
+                case ConsoleKey.D3:
+                    return (int)MenuItem.Search;
+
+                case ConsoleKey.NumPad4:
+                case ConsoleKey.D4:
+                    return (int)MenuItem.Quit;
+
+                default:
+                    return -1;
+            }
+
+        }
+
+        /* Display any title text, centered text */
+        static public void DisplayTitle(string text = "The logbook!")
+        {
+            int lineLen = 50;
+            int titleLen = text.Length;
+            int paddingLen = lineLen / 2 - titleLen / 2;
+            string line = "";
+            string padding = "";
+
+            for (int i = 0; i < lineLen; i++)
+            {
+                line += "-";
+            }
+
+            for (int i = 0; i < paddingLen; i++)
+            {
+                padding += " ";
+            }
+
+            Console.Clear();
+            Console.WriteLine(line);
+            Console.WriteLine(padding + text.ToUpper());
+            Console.WriteLine(line);
+
+        }
+
+        static public void Wait(string message = "Press any key to continue!")
+        {
+            Console.WriteLine(message);
+            Console.ReadKey(true);
+        }
+
+        static public bool Confirm(string message, char confirmKey = 'y')
+        {
+
+            if (!Enum.TryParse<ConsoleKey>(confirmKey.ToString(), out ConsoleKey key))
+            {
+                Console.WriteLine("Error: Could not parse key!");
+            }
+
+            Console.WriteLine(message);
+            return (Console.ReadKey(true).Key == key);
+        }
+    }
+
 }

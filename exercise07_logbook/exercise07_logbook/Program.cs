@@ -20,7 +20,7 @@
  *   - Create one or several methods
  *  
  * Johan Kämpe
- * 2017-07-13
+ * 2017-07-14
  * https://github.com/GoblinDynamiteer/  
  * https://www.linkedin.com/in/johankampe/  
  *   
@@ -29,7 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace exercise07_logbook
@@ -44,11 +44,7 @@ namespace exercise07_logbook
             logbook.AddEntry("A day at the zoo!", "I went to the " +
                 "zoo with my family today, we saw monkies and giraffes!!");
             logbook.AddEntry("Today's lunch", "I had pancakes with whipped " +
-                "cream and strawberry jam today!");
-
-            logbook.Save();
-
-            Console.ReadLine();
+                "cream and strawberry jam today!"); 
 
             int userChoice = 0; // User meny choice
             while (userChoice != (int)Menu.MenuItem.Quit)
@@ -77,6 +73,7 @@ namespace exercise07_logbook
                 }
             }
 
+            logbook.Save();
             Menu.DisplayTitle();
             Menu.Wait("Thanks for using the logbook!\n" +
                 "Press any key to quit...");
@@ -94,7 +91,9 @@ namespace exercise07_logbook
         int[] searchHits;
 
         string lastSearchString;
-        int id = 0; // For setting entry id
+        string dataFileName;
+        int id; // For setting entry id
+        public int count;
 
         /* Enums used for search */
         enum SearchData
@@ -115,21 +114,25 @@ namespace exercise07_logbook
         /* Error messages */
         string[] errorMsg = {
             "Could not convert log " +
-                "entry id to integer!",      // 0
-            "Entry ID not found!",           // 1
-            "Entry text cannot be blank!",   // 2
-            "Faulty ID input!",              // 3
-            "Could not export entry to file!"// 4
+                "entry id to integer!",         // 0
+            "Entry ID not found!",              // 1
+            "Entry text cannot be blank!",      // 2
+            "Faulty ID input!",                 // 3
+            "Could not export entry to file!",  // 4
+            "Failed to save data!",             // 5
+            "Failed to load data!"              // 6
         };
 
         /* Indexes for error messages */
         enum ErrorId
         {
-            IDToIndexConvertFail,       // 0
-            EntryIDNotFound,            // 1
-            BlankEntry,                 // 2
-            FaultyIntInput,             // 3
-            FileExport                  // 4
+            IndexConvert,   // 0
+            IDNotFound,     // 1
+            BlankEntry,     // 2
+            IntInput,       // 3
+            Export,         // 4
+            DataSave,       // 5
+            DataLoad        // 6
         }
         
         /* Constructor */
@@ -140,7 +143,25 @@ namespace exercise07_logbook
 
             searchHits = new int[(int)SearchData.MaxHits];
             lastSearchString = "";
+            dataFileName = "data.dat";
             ClearSearchHits();
+            id = 0;
+
+            /* Load saved logbook, if exists */
+            if (Load())
+            {
+                /* If load is successful, determine id for next new entry */
+                foreach (string[] item in entries)
+                {
+                    int check = int.Parse(item[(int)EntryData.ID]);
+                    if (check > id)
+                    {
+                        id = check;
+                    }
+                }
+
+                id++;
+            }
         }
 
         /* Clear search hit list */
@@ -285,7 +306,7 @@ namespace exercise07_logbook
 
             if (!int.TryParse(stringID, out int id))
             {
-                Menu.Error(errorMsg[(int)ErrorId.FaultyIntInput], true);
+                Menu.Error(errorMsg[(int)ErrorId.IntInput], true);
                 return;
             }
 
@@ -300,7 +321,7 @@ namespace exercise07_logbook
 
             if (index == -1) // Error
             {
-                Menu.Error(errorMsg[(int)ErrorId.EntryIDNotFound], true);
+                Menu.Error(errorMsg[(int)ErrorId.IDNotFound], true);
                 return;
             }
 
@@ -353,7 +374,7 @@ namespace exercise07_logbook
 
             if (index == -1) // Error
             {
-                Menu.Error(errorMsg[(int)ErrorId.EntryIDNotFound]);
+                Menu.Error(errorMsg[(int)ErrorId.IDNotFound]);
                 return;
             }
 
@@ -371,7 +392,7 @@ namespace exercise07_logbook
 
             if (index == -1) // Error
             {
-                Menu.Error(errorMsg[(int)ErrorId.EntryIDNotFound]);
+                Menu.Error(errorMsg[(int)ErrorId.IDNotFound]);
                 return;
             }
 
@@ -389,7 +410,7 @@ namespace exercise07_logbook
 
             if (index == -1) // Error
             {
-                Menu.Error(errorMsg[(int)ErrorId.EntryIDNotFound], true);
+                Menu.Error(errorMsg[(int)ErrorId.IDNotFound], true);
                 return; // Quit method if error
             }
 
@@ -403,7 +424,7 @@ namespace exercise07_logbook
             }
             catch (Exception)
             {
-                Menu.Error(errorMsg[(int)ErrorId.FileExport], true);
+                Menu.Error(errorMsg[(int)ErrorId.Export], true);
                 return; // Quit method if error
             }
 
@@ -411,7 +432,7 @@ namespace exercise07_logbook
             Menu.Wait();
         }
 
-        /* Save high scores to file */
+        /* Save logbook from datafile */
         public bool Save()
         {
             FileStream datafile = null;
@@ -420,7 +441,7 @@ namespace exercise07_logbook
             try
             {
                 datafile = new FileStream(
-                    "data.dat", FileMode.Create);
+                    dataFileName, FileMode.Create);
             }
             /* Eg. If write protected */
             catch (Exception)
@@ -435,14 +456,53 @@ namespace exercise07_logbook
                     BinaryFormatter formatter = new BinaryFormatter();
                     formatter.Serialize(datafile, entries);
                 }
-                catch (SerializationException e)
+                catch (Exception)
                 {
-                    Console.WriteLine("Failed to save: " + e.Message);
+                    Menu.Error(errorMsg[(int)ErrorId.DataSave]);
                 }
                 finally
                 {
                     datafile.Close();
                 }
+            }
+
+            return success;
+        }
+
+        /* Loads logbook from datafile */
+        public bool Load()
+        {
+            FileStream datafile = null;
+            bool success = true;
+
+            try
+            {
+                datafile = new FileStream(
+                    dataFileName, FileMode.Open);
+            }
+
+            /* If datafile does not exist, or write protected */
+            catch (Exception)
+            {
+                success = false;
+            }
+
+            if (success)
+            {
+                try
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+
+                    /* Note: Overwrites list if it contains contents */
+                    entries = (List<string[]>)formatter.Deserialize(datafile);
+                }
+                catch (Exception)
+                {
+                    Menu.Error(errorMsg[(int)ErrorId.DataLoad]);
+                    success = false;
+                }
+
+                datafile.Close();
             }
 
             return success;

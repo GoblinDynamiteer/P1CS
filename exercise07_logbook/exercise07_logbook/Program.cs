@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace exercise07_logbook
 {
@@ -73,7 +74,6 @@ namespace exercise07_logbook
             Menu.DisplayTitle();
             Menu.Wait("Thanks for using the logbook!\n" +
                 "Press any key to quit...");
-            Console.ReadKey(true);
         }
 
     }
@@ -108,11 +108,12 @@ namespace exercise07_logbook
 
         /* Error messages */
         string[] errorMsg = {
-            "Error: Could not convert log " +
-                "entry id to integer!",             // 0
-            "Error: Entry ID not found!",           // 1
-            "Error: Entry text cannot be blank!",   // 2
-            "Error: Faulty ID input!"               // 3
+            "Could not convert log " +
+                "entry id to integer!",      // 0
+            "Entry ID not found!",           // 1
+            "Entry text cannot be blank!",   // 2
+            "Faulty ID input!",              // 3
+            "Could not export entry to file!"// 4
         };
 
         /* Indexes for error messages */
@@ -121,7 +122,8 @@ namespace exercise07_logbook
             IDToIndexConvertFail,       // 0
             EntryIDNotFound,            // 1
             BlankEntry,                 // 2
-            FaultyIntInput              // 3
+            FaultyIntInput,             // 3
+            FileExport                  // 4
         }
         
         /* Constructor */
@@ -301,26 +303,29 @@ namespace exercise07_logbook
             Menu.DisplayTitle(entries[index][(int)EntryData.Date], false, true, false);
             Console.WriteLine(entries[index][(int)EntryData.Content]);
             Menu.DisplayLine();
-            Console.WriteLine("Options:\n(E)xport | Change (T)itle | Change (C)ontent | (D)elete\n" +
+            Console.WriteLine("Options:\n(E)xport | Change (T)itle or (C)ontent | (D)elete\n" +
                 "Press any other key to return to main menu. ");
 
             ConsoleKeyInfo keyPress = Console.ReadKey(true);
 
             switch (keyPress.Key)
             {
-                case ConsoleKey.E:
-                    Console.WriteLine("TEMP EXPORT");
+                case ConsoleKey.E: // Export
+                    Menu.DisplayLine();
+                    Console.Write("Enter filename: ");
+                    ExportEntry(id, Console.ReadLine());
                     break;
 
-                case ConsoleKey.T:
+                case ConsoleKey.T: // Edit title
                     EditTitle(id);
                     break;
 
-                case ConsoleKey.C:
+                case ConsoleKey.C: // Edit content
                     EditContent(id);
                     break;
 
-                case ConsoleKey.D:
+                case ConsoleKey.D: // Delete entry
+                    Menu.DisplayLine();
                     if (Menu.Confirm("Are you sure? Press (Y) " +
                         "to delete entry: ", 'Y'))
                     {
@@ -368,6 +373,36 @@ namespace exercise07_logbook
             string newContent = Console.ReadLine();
 
             UpdateEntry(index, "", newContent);
+        }
+
+        /* Export log entry to text file */
+        public void ExportEntry(int id, string filename)
+        {
+            /* Search for list index */
+            int index = FindEntryIndex(id);
+
+            if (index == -1) // Error
+            {
+                Menu.Error(errorMsg[(int)ErrorId.EntryIDNotFound], true);
+                return; // Quit method if error
+            }
+
+            try // Write entry to text file
+            {
+                StreamWriter file = new StreamWriter(filename + ".txt");
+                file.WriteLine(entries[index][(int)EntryData.Title]);
+                file.WriteLine(entries[index][(int)EntryData.Date]);
+                file.WriteLine(entries[index][(int)EntryData.Content]);
+                file.Close();
+            }
+            catch (Exception)
+            {
+                Menu.Error(errorMsg[(int)ErrorId.FileExport], true);
+                return; // Quit method if error
+            }
+
+            Console.WriteLine("File exported to {0}.txt!", filename);
+            Menu.Wait();
         }
 
         /* Edit entry -- Only non blank parameters are updated */

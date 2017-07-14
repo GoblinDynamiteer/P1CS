@@ -29,6 +29,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace exercise07_logbook
 {
@@ -43,6 +45,10 @@ namespace exercise07_logbook
                 "zoo with my family today, we saw monkies and giraffes!!");
             logbook.AddEntry("Today's lunch", "I had pancakes with whipped " +
                 "cream and strawberry jam today!");
+
+            logbook.Save();
+
+            Console.ReadLine();
 
             int userChoice = 0; // User meny choice
             while (userChoice != (int)Menu.MenuItem.Quit)
@@ -403,6 +409,43 @@ namespace exercise07_logbook
 
             Console.WriteLine("File exported to {0}.txt!", filename);
             Menu.Wait();
+        }
+
+        /* Save high scores to file */
+        public bool Save()
+        {
+            FileStream datafile = null;
+            bool success = true;
+
+            try
+            {
+                datafile = new FileStream(
+                    "data.dat", FileMode.Create);
+            }
+            /* Eg. If write protected */
+            catch (Exception)
+            {
+                success = false;
+            }
+
+            if (success)
+            {
+                try
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    formatter.Serialize(datafile, entries);
+                }
+                catch (SerializationException e)
+                {
+                    Console.WriteLine("Failed to save: " + e.Message);
+                }
+                finally
+                {
+                    datafile.Close();
+                }
+            }
+
+            return success;
         }
 
         /* Edit entry -- Only non blank parameters are updated */

@@ -62,14 +62,7 @@ namespace exercise07_logbook
 
                     case (int)Menu.MenuItem.Search:
                         Menu.DisplayTitle("Search entries");
-                        int hits = logbook.Search();
-                        Menu.DisplayTitle(
-                            String.Format("Found {0} items!", hits));
-                        if (hits > 0)
-                        {
-                            logbook.DisplaySearchHits();
-                        }
-                        
+                        logbook.Search();
                         break;
 
                     default:
@@ -77,7 +70,7 @@ namespace exercise07_logbook
                 }
             }
 
-            Console.Clear();
+            Menu.DisplayTitle();
             Menu.Wait("Thanks for using the logbook!\n" +
                 "Press any key to quit...");
             Console.ReadKey(true);
@@ -88,41 +81,47 @@ namespace exercise07_logbook
     /* Class for logbooks */
     class Logbook
     {
+        /* List for holding logbook entries */
         List<string[]> entries;
-        int[] searchHits;
-        int id = 0;
-        string line = "-------------------------------------------";
 
+        /* Array for holding indexes for searches */
+        int[] searchHits;
+
+        string lastSearchString;
+        int id = 0; // For setting entry id
+
+        /* Enums used for search */
         enum SearchData
         {
             Empty = -1,
             MaxHits = 50
         }
 
-        /* Entry string indexes */
+        /* Enums used for entry string array indexes */
         enum EntryData
         {
-            Title,
-            Content,
-            Date,
-            ID
+            Title,      // 0
+            Content,    // 1
+            Date,       // 2
+            ID          // 3
         }
 
         /* Error messages */
         string[] errorMsg = {
-            "Error: Could not convert log entry id to integer!",
-            "Error: Entry ID not found!",
-            "Error: Entry text cannot be blank!",
-            "Error: Faulty ID input!"
+            "Error: Could not convert log " +
+                "entry id to integer!",             // 0
+            "Error: Entry ID not found!",           // 1
+            "Error: Entry text cannot be blank!",   // 2
+            "Error: Faulty ID input!"               // 3
         };
 
         /* Indexes for error messages */
         enum ErrorId
         {
-            IDToIndexConvertFail,
-            EntryIDNotFound,
-            BlankEntry,
-            FaultyIntInput
+            IDToIndexConvertFail,       // 0
+            EntryIDNotFound,            // 1
+            BlankEntry,                 // 2
+            FaultyIntInput              // 3
         }
         
         /* Constructor */
@@ -132,6 +131,7 @@ namespace exercise07_logbook
             entries = new List<string[]>();
 
             searchHits = new int[(int)SearchData.MaxHits];
+            lastSearchString = "";
             ClearSearchHits();
         }
 
@@ -145,9 +145,10 @@ namespace exercise07_logbook
         }
 
         /* Search entries, returns hits */
-        public int Search(string searchString)
+        public void Search(string searchString)
         {
             ClearSearchHits();
+            lastSearchString = searchString;
             int hits = 0;
 
             /* Linear search */
@@ -160,27 +161,29 @@ namespace exercise07_logbook
                 }
 
                 if (entry[(int)EntryData.Content].Contains(searchString) ||
-                    entry[(int)EntryData.Title].Contains(searchString))
+                    entry[(int)EntryData.Title].Contains(searchString) ||
+                    entry[(int)EntryData.Date].Contains(searchString))
                 {
                     /* Add entry index to search hits array */
                     searchHits[hits++] = int.Parse(entry[(int)EntryData.ID]);
                 }
             }
-
-            return hits;
+            DisplaySearchHits(hits);
         }
 
         /* Search entries, manual input, returns hits */
-        public int Search()
+        public void Search()
         {
             Console.Write("Enter search string: ");
             string search = Console.ReadLine();
-            return Search(search);
+            Search(search);
         }
 
         /* Display entries stored in searchHits array */
-        public void DisplaySearchHits()
+        public void DisplaySearchHits(int hits)
         {
+            Menu.DisplayTitle(string.Format("Search: Found {0} hits for {1}", 
+                hits, lastSearchString));
             Console.WriteLine("ID\tDATE\t\t\tTITLE");
             for (int i = 0; i < (int)SearchData.MaxHits; i++)
             {
@@ -251,7 +254,7 @@ namespace exercise07_logbook
 
             while (content == "")
             {
-                Console.WriteLine(errorMsg[(int)ErrorId.BlankEntry]);
+                Menu.Error(errorMsg[(int)ErrorId.BlankEntry], false);
                 Console.WriteLine("Enter text for new entry: ");
                 content = Console.ReadLine();
             }
@@ -263,7 +266,8 @@ namespace exercise07_logbook
         public void DeleteEntry(int id)
         {
             entries.RemoveAt(id);
-            Console.WriteLine("Entry with id {0} deleted!", id);
+            Menu.Wait(String.Format("Entry with id {0} deleted!\n" +
+                "Press any key to continue", id));
         }
 
         public void DisplayEntry()
@@ -273,8 +277,7 @@ namespace exercise07_logbook
 
             if (!int.TryParse(stringID, out int id))
             {
-                Console.WriteLine(errorMsg[(int)ErrorId.FaultyIntInput]);
-                Menu.Wait();
+                Menu.Error(errorMsg[(int)ErrorId.FaultyIntInput], true);
                 return;
             }
 
@@ -289,18 +292,15 @@ namespace exercise07_logbook
 
             if (index == -1) // Error
             {
-                Console.WriteLine(errorMsg[(int)ErrorId.EntryIDNotFound]);
-                Menu.Wait();
+                Menu.Error(errorMsg[(int)ErrorId.EntryIDNotFound], true);
                 return;
             }
 
             /* Text output */
-            Console.WriteLine(line);
-            Console.WriteLine(entries[index][(int)EntryData.Title]);
-            Console.WriteLine(entries[index][(int)EntryData.Date]);
-            Console.WriteLine(line);
+            Menu.DisplayTitle(entries[index][(int)EntryData.Title], true, false);
+            Menu.DisplayTitle(entries[index][(int)EntryData.Date], false, true, false);
             Console.WriteLine(entries[index][(int)EntryData.Content]);
-            Console.WriteLine(line);
+            Menu.DisplayLine();
             Console.WriteLine("Options:\n(E)xport | Change (T)itle | Change (C)ontent | (D)elete\n" +
                 "Press any other key to return to main menu. ");
 
@@ -342,7 +342,7 @@ namespace exercise07_logbook
 
             if (index == -1) // Error
             {
-                Console.WriteLine(errorMsg[(int)ErrorId.EntryIDNotFound]);
+                Menu.Error(errorMsg[(int)ErrorId.EntryIDNotFound]);
                 return;
             }
 
@@ -360,7 +360,7 @@ namespace exercise07_logbook
 
             if (index == -1) // Error
             {
-                Console.WriteLine(errorMsg[(int)ErrorId.EntryIDNotFound]);
+                Menu.Error(errorMsg[(int)ErrorId.EntryIDNotFound]);
                 return;
             }
 
@@ -379,7 +379,7 @@ namespace exercise07_logbook
             entries[index][(int)EntryData.Content] = content == "" ? 
                 entries[index][(int)EntryData.Content] : content;
         }
-
+        
         /* Find entry list index from id */
         int FindEntryIndex(int id)
         {
@@ -407,10 +407,11 @@ namespace exercise07_logbook
             Quit
         }
 
+        static int lineLen = 60;
+
         /* Display the main menu for the logbook */
         static public int DisplayMenu()
         {
-
             string[] menuItems =
             {
                 "Add logbook entry",
@@ -419,14 +420,14 @@ namespace exercise07_logbook
                 "Quit"
             };
 
-            Console.Clear();
             DisplayTitle();
 
             for (int i = 0; i < menuItems.Length; i++)
             {
-                Console.WriteLine("[{0}] {1}", i + 1, menuItems[i]);
+                Console.WriteLine(" [{0}] {1}", i + 1, menuItems[i]);
             }
 
+            Menu.DisplayLine();
             Console.Write("Press key to select menu: ");
             ConsoleKeyInfo keyPress = Console.ReadKey(true);
 
@@ -454,48 +455,67 @@ namespace exercise07_logbook
 
         }
 
-        /* Display any title text, centered text */
-        static public void DisplayTitle(string text = "The logbook!")
+        /* Display any title text, centered */
+        static public void DisplayTitle(string text = "The Logbook", 
+            bool line1 = true, bool line2 = true, bool clearScreen = true)
         {
-            int lineLen = 50;
             int titleLen = text.Length;
             int paddingLen = lineLen / 2 - titleLen / 2;
-            string line = "";
+            
             string padding = "";
-
-            for (int i = 0; i < lineLen; i++)
-            {
-                line += "-";
-            }
-
             for (int i = 0; i < paddingLen; i++)
             {
                 padding += " ";
             }
 
-            Console.Clear();
-            Console.WriteLine(line);
+            if(clearScreen) Console.Clear();
+            if(line1) DisplayLine();
             Console.WriteLine(padding + text.ToUpper());
-            Console.WriteLine(line);
-
+            if(line2) DisplayLine();
         }
 
+        /* Displays a line */
+        static public void DisplayLine()
+        {
+            string line = "";
+            for (int i = 0; i < lineLen; i++)
+            {
+                line += "-";
+            }
+            Console.WriteLine(line);
+        }
+
+        /* Ask user to press any key to continue */
         static public void Wait(string message = "Press any key to continue!")
         {
             Console.WriteLine(message);
-            Console.ReadKey(true);
+            Console.ReadKey(true); // Halt until any key is pressed
         }
 
+        /* Display confirmation prompt, ask user to press a specific key
+         * to confirm. Returns true / false depending on user input */
         static public bool Confirm(string message, char confirmKey = 'y')
         {
 
-            if (!Enum.TryParse<ConsoleKey>(confirmKey.ToString(), out ConsoleKey key))
+            if (!Enum.TryParse<ConsoleKey>(confirmKey.ToString(), 
+                out ConsoleKey key))
             {
-                Console.WriteLine("Error: Could not parse key!");
+                Error("Could not parse key!");
             }
 
             Console.WriteLine(message);
             return (Console.ReadKey(true).Key == key);
+        }
+
+        /* Display error message, with option to 
+         * ask user to press any key to continue */
+        static public void Error(string message, bool displayWait = false)
+        {
+            Console.WriteLine("Error: {0}", message);
+            if (displayWait)
+            {
+                Wait();
+            }
         }
     }
 

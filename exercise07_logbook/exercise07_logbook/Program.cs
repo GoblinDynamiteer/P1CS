@@ -108,6 +108,13 @@ namespace exercise07_logbook
             "Entry Date Descending"
         };
 
+        string[] displayEntryMenu = {
+            "Export to text file",
+            "Change title",
+            "Change content",
+            "Delete entry"
+        };
+
         public enum SortBy
         {
             IDAscending,
@@ -296,7 +303,7 @@ namespace exercise07_logbook
             Console.WriteLine("[{0}]\t[{1}]\t[{2}] ", entryId, entryDate, entryTitle);
         }
 
-        /* Add entry to logbook, with passed parameters */
+        /* Add entry to logbook */
         public int AddEntry(string title, string content)
         {
             /* Add logbook entry contents to string array */
@@ -354,18 +361,18 @@ namespace exercise07_logbook
             Console.Write("Enter ID: ");
             string stringID = Console.ReadLine();
 
-            if (stringID == "")
+            if (stringID == "") // Return to main menu
             {
                 return;
             }
 
-            if (!int.TryParse(stringID, out int id))
+            if (!int.TryParse(stringID, out int id)) // Parsing error
             {
                 Menu.Error(errorMsg[(int)ErrorId.IntInput], true);
                 return;
             }
 
-            DisplayEntry(id);
+            DisplayEntry(id); // Display entry with parsed ID
         }
 
         /* Display a log entry, pass id as parameter */
@@ -377,7 +384,7 @@ namespace exercise07_logbook
             if (index == -1) // Error
             {
                 Menu.Error(errorMsg[(int)ErrorId.IDNotFound], true);
-                return;
+                return; // End method
             }
 
             /* Text output */
@@ -385,28 +392,41 @@ namespace exercise07_logbook
             Menu.DisplayTitle(entries[index][(int)EntryData.Date], false, true, false);
             Console.WriteLine(entries[index][(int)EntryData.Content]);
             Menu.DisplayLine();
-            Console.WriteLine("Options:\n(E)xport | Change (T)itle or (C)ontent | (D)elete\n" +
-                "Press any other key to return to main menu. ");
+
+
+            Console.WriteLine("Options:");
+            for (int i = 0; i < displayEntryMenu.Length; i++)
+            {
+                Console.WriteLine(" [{0}] {1}", i + 1, displayEntryMenu[i]);
+            }
+
+            Menu.DisplayLine();
+            Console.WriteLine("Enter Option number\n" +
+                "or press any other key to return to main menu.");
 
             ConsoleKeyInfo keyPress = Console.ReadKey(true);
 
             switch (keyPress.Key)
             {
-                case ConsoleKey.E: // Export
+                case ConsoleKey.D1: // Export
+                case ConsoleKey.NumPad1:
                     Menu.DisplayLine();
                     Console.Write("Enter filename: ");
                     ExportEntry(id, Console.ReadLine());
                     break;
 
-                case ConsoleKey.T: // Edit title
+                case ConsoleKey.D2: // Edit title
+                case ConsoleKey.NumPad2:
                     EditTitle(id);
                     break;
 
-                case ConsoleKey.C: // Edit content
+                case ConsoleKey.D3: // Edit content
+                case ConsoleKey.NumPad3:
                     EditContent(id);
                     break;
 
-                case ConsoleKey.D: // Delete entry
+                case ConsoleKey.D4: // Delete entry
+                case ConsoleKey.NumPad4:
                     Menu.DisplayLine();
                     if (Menu.Confirm("Are you sure? Press (Y) " +
                         "to delete entry: ", ConsoleKey.Y))

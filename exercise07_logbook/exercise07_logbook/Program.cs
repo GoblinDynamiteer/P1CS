@@ -44,7 +44,9 @@ namespace exercise07_logbook
             logbook.AddEntry("A day at the zoo!", "I went to the " +
                 "zoo with my family today, we saw monkies and giraffes!!");
             logbook.AddEntry("Today's lunch", "I had pancakes with whipped " +
-                "cream and strawberry jam today!"); 
+                "cream and strawberry jam today!");
+            logbook.AddEntry("New TV-Show", "Wow this new show on TV is really good! " +
+                "Can't wait until the next episode is released!");
 
             Menu.MenuItem userChoice = Menu.MenuItem.Default; // User meny choice
             while (userChoice != Menu.MenuItem.Quit)
@@ -70,7 +72,7 @@ namespace exercise07_logbook
 
                     case Menu.MenuItem.Sort:
                         Menu.DisplayTitle("Sort entries");
-                        logbook.Sort(Logbook.SortBy.IDAscending);
+                        logbook.Sort();
                         break;
 
                     default:
@@ -106,6 +108,15 @@ namespace exercise07_logbook
             Empty = -1,
             MaxHits = 50
         }
+
+        string[] sortMenu = {
+            "Entry ID, Ascending",
+            "Entry ID, Descending",
+            "Entry Title, Ascending",
+            "Entry Title, Descending",
+            "Entry Date, Ascending",
+            "Entry Date Descending"
+        };
 
         public enum SortBy
         {
@@ -220,9 +231,8 @@ namespace exercise07_logbook
         /* Search entries, manual input, returns hits */
         public void Search()
         {
-            Console.Write("Enter search string: ");
-            string search = Console.ReadLine();
-            Search(search);
+            Console.Write("Enter search string (Case sensitive): ");
+            Search(Console.ReadLine());
         }
 
         /* Display entries stored in searchHits array */
@@ -371,7 +381,7 @@ namespace exercise07_logbook
                 case ConsoleKey.D: // Delete entry
                     Menu.DisplayLine();
                     if (Menu.Confirm("Are you sure? Press (Y) " +
-                        "to delete entry: ", 'Y'))
+                        "to delete entry: ", ConsoleKey.Y))
                     {
                         DeleteEntry(id);
                     }
@@ -533,6 +543,63 @@ namespace exercise07_logbook
                 entries[index][(int)EntryData.Title] : title;
             entries[index][(int)EntryData.Content] = content == "" ? 
                 entries[index][(int)EntryData.Content] : content;
+        }
+
+        public void Sort()
+        {
+            Menu.DisplayTitle("Sort Entries");
+            Console.WriteLine("Sort by:");
+            for (int i = 0; i < sortMenu.Length; i++)
+            {
+                Console.WriteLine("[{0}] {1}", i+1, sortMenu[i]);
+            }
+
+            Console.WriteLine("Enter menu item to sort entries,\n" +
+                "or press any other key to return to main menu.");
+
+            ConsoleKeyInfo keyPress = Console.ReadKey(true);
+
+            switch (keyPress.Key)
+            {
+                case ConsoleKey.D1:
+                case ConsoleKey.NumPad1:
+                    Sort(SortBy.IDAscending);
+                    break;
+
+                case ConsoleKey.D2:
+                case ConsoleKey.NumPad2:
+                    Sort(SortBy.IDDescending);
+                    break;
+
+                case ConsoleKey.D3:
+                case ConsoleKey.NumPad3:
+                    Sort(SortBy.TitleAscending);
+                    break;
+
+                case ConsoleKey.D4:
+                case ConsoleKey.NumPad4:
+                    Sort(SortBy.TitleDescending);
+                    break;
+
+                case ConsoleKey.D5:
+                case ConsoleKey.NumPad5:
+                    Sort(SortBy.DateAscending);
+                    break;
+
+                case ConsoleKey.D6:
+                case ConsoleKey.NumPad6:
+                    Sort(SortBy.DateDescending);
+                    break;
+
+                default:
+                    return; // End method
+            }
+
+            if (Menu.Confirm("Entries sorted!\n" +
+                "Press (Y) to display all entries"))
+            {
+                DisplayAllEntries();
+            }
         }
 
         /* Sort entries with insertion sort */
@@ -697,7 +764,7 @@ namespace exercise07_logbook
             bool line1 = true, bool line2 = true, bool clearScreen = true)
         {
             int titleLen = text.Length;
-            int paddingLen = lineLen / 2 - titleLen / 2;
+            int paddingLen = titleLen < lineLen ? lineLen / 2 - titleLen / 2 : 0;
             
             string padding = "";
             for (int i = 0; i < paddingLen; i++)
@@ -731,15 +798,8 @@ namespace exercise07_logbook
 
         /* Display confirmation prompt, ask user to press a specific key
          * to confirm. Returns true / false depending on user input */
-        static public bool Confirm(string message, char confirmKey = 'y')
+        static public bool Confirm(string message, ConsoleKey key = ConsoleKey.Y)
         {
-
-            if (!Enum.TryParse<ConsoleKey>(confirmKey.ToString(), 
-                out ConsoleKey key))
-            {
-                Error("Could not parse key!");
-            }
-
             Console.WriteLine(message);
             return (Console.ReadKey(true).Key == key);
         }

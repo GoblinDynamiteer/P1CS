@@ -38,15 +38,7 @@ namespace exercise07_logbook
     {
         static void Main(string[] args)
         {
-            Logbook logbook = new Logbook();
-
-            /* Add some sample entries */
-            logbook.AddEntry("A day at the zoo!", "I went to the " +
-                "zoo with my family today, we saw monkies and giraffes!!");
-            logbook.AddEntry("Today's lunch", "I had pancakes with whipped " +
-                "cream and strawberry jam today!");
-            logbook.AddEntry("New TV-Show", "Wow this new show on TV is really good! " +
-                "Can't wait until the next episode is released!");
+            Logbook logbook = new Logbook(true);
 
             Menu.MenuItem userChoice = Menu.MenuItem.Default; // User meny choice
             while (userChoice != Menu.MenuItem.Quit)
@@ -61,8 +53,7 @@ namespace exercise07_logbook
                         break;
 
                     case Menu.MenuItem.ListAll:
-                        Menu.DisplayTitle("All logbook entries");
-                        logbook.DisplayAllEntries();
+                        logbook.DisplayAllTitles();
                         break;
 
                     case Menu.MenuItem.Search:
@@ -100,7 +91,6 @@ namespace exercise07_logbook
         string lastSearchString;
         string dataFileName;
         int id; // For setting entry id
-        public int count;
 
         /* Enums used for search */
         enum SearchData
@@ -147,7 +137,8 @@ namespace exercise07_logbook
             "Could not export entry to file!",  // 4
             "Failed to save data!",             // 5
             "Failed to load data!",             // 6
-            "Incorrect sort value!"             //7
+            "Incorrect sort value!",            // 7
+            "No entries found!"                 // 8
         };
 
         /* Indexes for error messages */
@@ -160,11 +151,12 @@ namespace exercise07_logbook
             Export,         // 4
             DataSave,       // 5
             DataLoad,       // 6
-            Sort            // 7
+            Sort,           // 7
+            EmptyLog        // 8
         }
         
         /* Constructor */
-        public Logbook()
+        public Logbook(bool addSamples = false)
         {
             /* List of string vectors, for holding logbook entries */
             entries = new List<string[]>();
@@ -190,6 +182,17 @@ namespace exercise07_logbook
 
                 id++;
             }
+
+            if (addSamples)
+            {
+                AddSamples();
+            }
+        }
+
+        /* Get number of logbook entries */
+        public int Count()
+        {
+            return entries.Count;
         }
 
         /* Clear search hit list */
@@ -221,7 +224,7 @@ namespace exercise07_logbook
                     entry[(int)EntryData.Title].Contains(searchString) ||
                     entry[(int)EntryData.Date].Contains(searchString))
                 {
-                    /* Add entry index to search hits array */
+                    /* Add entry ID to search hits array */
                     searchHits[hits++] = int.Parse(entry[(int)EntryData.ID]);
                 }
             }
@@ -238,6 +241,14 @@ namespace exercise07_logbook
         /* Display entries stored in searchHits array */
         public void DisplaySearchHits(int hits)
         {
+            if (hits == 0)
+            {
+                Menu.DisplayTitle(string.Format(
+                    "Search: Found no hits for {0}", lastSearchString));
+                Menu.Wait("Found no entries!\nPress any key to continue!");
+                return;
+            }
+
             Menu.DisplayTitle(string.Format("Search: Found {0} hits for {1}", 
                 hits, lastSearchString));
             Console.WriteLine("ID\tDATE\t\t\tTITLE");
@@ -248,7 +259,7 @@ namespace exercise07_logbook
                     break;
                 }
 
-                DisplayTitle(int.Parse(entries[searchHits[i]][(int)EntryData.ID]));
+                DisplayTitle(searchHits[i]);
             }
 
             Console.WriteLine();
@@ -256,8 +267,17 @@ namespace exercise07_logbook
         }
 
         /* Display all log entries */
-        public void DisplayAllEntries()
+        public void DisplayAllTitles()
         {
+            Menu.DisplayTitle(string.Format("All entries ({0})", 
+                Count()));
+
+            if (entries.Count == 0)
+            {
+                Menu.Error(errorMsg[(int)ErrorId.EmptyLog], true);
+                return;
+            }
+
             Console.WriteLine("ID\tDATE\t\t\tTITLE");
 
             entries.ForEach(entry => DisplayTitle(int.Parse(entry[(int)EntryData.ID])));
@@ -266,13 +286,13 @@ namespace exercise07_logbook
             DisplayEntry();
         }
 
-        /* List title with id */
+        /* Display entry title with id and creation date */
         void DisplayTitle(int id)
         {
             int index = FindEntryIndex(id);
-            string entryId = entries[index][(int)EntryData.ID];
+            string entryId =    entries[index][(int)EntryData.ID];
             string entryTitle = entries[index][(int)EntryData.Title];
-            string entryDate = entries[index][(int)EntryData.Date];
+            string entryDate =  entries[index][(int)EntryData.Date];
             Console.WriteLine("[{0}]\t[{1}]\t[{2}] ", entryId, entryDate, entryTitle);
         }
 
@@ -281,9 +301,9 @@ namespace exercise07_logbook
         {
             /* Add logbook entry contents to string array */
             string[] stringEntry = new string[4];
-            stringEntry[(int)EntryData.Title] = title;
-            stringEntry[(int)EntryData.ID] = id++.ToString();
-            stringEntry[(int)EntryData.Date] = DateTime.Now.ToString();
+            stringEntry[(int)EntryData.Title]   = title;
+            stringEntry[(int)EntryData.ID]      = id++.ToString();
+            stringEntry[(int)EntryData.Date]    = DateTime.Now.ToString();
             stringEntry[(int)EntryData.Content] = content;
 
             /* Add string array to list */
@@ -321,15 +341,23 @@ namespace exercise07_logbook
         /* Delete entry */
         public void DeleteEntry(int id)
         {
-            entries.RemoveAt(id);
+            int index = FindEntryIndex(id);
+            entries.RemoveAt(index);
             Menu.Wait(String.Format("Entry with id {0} deleted!\n" +
                 "Press any key to continue", id));
         }
 
         public void DisplayEntry()
         {
-            Console.Write("Enter entry ID: ");
+            Console.WriteLine("Enter ID to display entry." +
+                "\nInput blank to return to the main menu.");
+            Console.Write("Enter ID: ");
             string stringID = Console.ReadLine();
+
+            if (stringID == "")
+            {
+                return;
+            }
 
             if (!int.TryParse(stringID, out int id))
             {
@@ -551,9 +579,9 @@ namespace exercise07_logbook
             Console.WriteLine("Sort by:");
             for (int i = 0; i < sortMenu.Length; i++)
             {
-                Console.WriteLine("[{0}] {1}", i+1, sortMenu[i]);
+                Console.WriteLine(" [{0}] {1}", i+1, sortMenu[i]);
             }
-
+            Menu.DisplayLine();
             Console.WriteLine("Enter menu item to sort entries,\n" +
                 "or press any other key to return to main menu.");
 
@@ -598,7 +626,7 @@ namespace exercise07_logbook
             if (Menu.Confirm("Entries sorted!\n" +
                 "Press (Y) to display all entries"))
             {
-                DisplayAllEntries();
+                DisplayAllTitles();
             }
         }
 
@@ -686,10 +714,26 @@ namespace exercise07_logbook
                 if (entries[i][(int)EntryData.ID] == id.ToString())
                 {
                     retval = i;
+                    break;
                 }
             }
 
             return retval;
+        }
+
+        /* Write sample entries */
+        public void AddSamples()
+        {
+            AddEntry("A day at the zoo!", "I went to the " +
+                "zoo with my family today, we saw monkies and giraffes!!");
+            AddEntry("Today's lunch", "I had pancakes with whipped " +
+                "cream and strawberry jam today!");
+            AddEntry("New TV-Show", "Wow this new show on TV is really good! " +
+                "Can't wait until the next episode is released!");
+            AddEntry("Weather Report", "It's raining and is super cold today! >;(");
+            AddEntry("C# Coding", "I'm learning C#, fun fun!");
+            AddEntry("C# Classes and Objects", "Today im learning about classes and " +
+                "objects in C#. Its an object-oriented coded language!");
         }
     }
 
@@ -728,7 +772,7 @@ namespace exercise07_logbook
             }
 
             Menu.DisplayLine();
-            Console.Write("Press key to select menu: ");
+            Console.Write("Press key to select menu item: ");
             ConsoleKeyInfo keyPress = Console.ReadKey(true);
 
             switch (keyPress.Key)

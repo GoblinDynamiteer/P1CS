@@ -46,26 +46,31 @@ namespace exercise07_logbook
             logbook.AddEntry("Today's lunch", "I had pancakes with whipped " +
                 "cream and strawberry jam today!"); 
 
-            int userChoice = 0; // User meny choice
-            while (userChoice != (int)Menu.MenuItem.Quit)
+            Menu.MenuItem userChoice = Menu.MenuItem.Default; // User meny choice
+            while (userChoice != Menu.MenuItem.Quit)
             {
                 userChoice = Menu.DisplayMenu();
 
                 switch (userChoice)
                 {
-                    case (int)Menu.MenuItem.Add:
+                    case Menu.MenuItem.Add:
                         Menu.DisplayTitle("Add log entry");
                         logbook.AddEntry();
                         break;
 
-                    case (int)Menu.MenuItem.ListAll:
+                    case Menu.MenuItem.ListAll:
                         Menu.DisplayTitle("All logbook entries");
                         logbook.DisplayAllEntries();
                         break;
 
-                    case (int)Menu.MenuItem.Search:
+                    case Menu.MenuItem.Search:
                         Menu.DisplayTitle("Search entries");
                         logbook.Search();
+                        break;
+
+                    case Menu.MenuItem.Sort:
+                        Menu.DisplayTitle("Sort entries");
+                        logbook.Sort(Logbook.SortBy.IDAscending);
                         break;
 
                     default:
@@ -102,6 +107,16 @@ namespace exercise07_logbook
             MaxHits = 50
         }
 
+        public enum SortBy
+        {
+            IDAscending,
+            IDDescending,
+            TitleAscending,
+            TitleDescending,
+            DateAscending,
+            DateDescending
+        }
+
         /* Enums used for entry string array indexes */
         enum EntryData
         {
@@ -120,7 +135,8 @@ namespace exercise07_logbook
             "Faulty ID input!",                 // 3
             "Could not export entry to file!",  // 4
             "Failed to save data!",             // 5
-            "Failed to load data!"              // 6
+            "Failed to load data!",             // 6
+            "Incorrect sort value!"             //7
         };
 
         /* Indexes for error messages */
@@ -132,7 +148,8 @@ namespace exercise07_logbook
             IntInput,       // 3
             Export,         // 4
             DataSave,       // 5
-            DataLoad        // 6
+            DataLoad,       // 6
+            Sort            // 7
         }
         
         /* Constructor */
@@ -517,6 +534,81 @@ namespace exercise07_logbook
             entries[index][(int)EntryData.Content] = content == "" ? 
                 entries[index][(int)EntryData.Content] : content;
         }
+
+        /* Sort entries with insertion sort */
+        public void Sort(SortBy sort = SortBy.DateAscending)
+        {
+            int sortIndex;
+            bool ascending;
+
+            switch (sort)
+            {
+                case SortBy.IDAscending:
+                    sortIndex = (int)EntryData.ID;
+                    ascending = true;
+                    break;
+                case SortBy.IDDescending:
+                    sortIndex = (int)EntryData.ID;
+                    ascending = false;
+                    break;
+                case SortBy.TitleAscending:
+                    sortIndex = (int)EntryData.Title;
+                    ascending = true;
+                    break;
+                case SortBy.TitleDescending:
+                    sortIndex = (int)EntryData.Title;
+                    ascending = false;
+                    break;
+                case SortBy.DateAscending:
+                    sortIndex = (int)EntryData.Date;
+                    ascending = true;
+                    break;
+                case SortBy.DateDescending:
+                    sortIndex = (int)EntryData.Date;
+                    ascending = false;
+                    break;
+                default:
+                    Menu.Error(errorMsg[(int)ErrorId.Sort], true);
+                    return;
+            }
+            
+            /* Indexes for sorting */
+            int ix, jx;
+
+            for (ix = 0; ix < entries.Count; ix++)
+            {
+                jx = ix;
+
+                if (ascending)
+                {
+                    while (jx != 0 &&
+                        string.Compare(entries[jx - 1][sortIndex], entries[jx][sortIndex]) > 0)
+                    {
+                        SortSwap(jx, jx - 1);
+                        jx--;
+                    }
+                }
+
+                else
+                {
+                    while (jx != 0 &&
+                        string.Compare(entries[jx - 1][sortIndex], entries[jx][sortIndex]) < 0)
+                    {
+                        SortSwap(jx, jx - 1);
+                        jx--;
+                    }
+                }
+
+            }
+        }
+
+        /* Helper method for sort, swaps two elements in entry list */
+        void SortSwap(int i1, int i2)
+        {
+            string[] temp = entries[i1];
+            entries[i1] = entries[i2];
+            entries[i2] = temp;
+        }
         
         /* Find entry list index from id */
         int FindEntryIndex(int id)
@@ -542,19 +634,22 @@ namespace exercise07_logbook
             Add,
             ListAll,
             Search,
-            Quit
+            Sort,
+            Quit,
+            Default
         }
 
         static int lineLen = 60;
 
         /* Display the main menu for the logbook */
-        static public int DisplayMenu()
+        static public MenuItem DisplayMenu()
         {
             string[] menuItems =
             {
                 "Add logbook entry",
                 "List all logbook entries",
                 "Search",
+                "Sort",
                 "Quit"
             };
 
@@ -573,22 +668,26 @@ namespace exercise07_logbook
             {
                 case ConsoleKey.NumPad1:
                 case ConsoleKey.D1:
-                    return (int)MenuItem.Add;
+                    return MenuItem.Add;
 
                 case ConsoleKey.NumPad2:
                 case ConsoleKey.D2:
-                    return (int)MenuItem.ListAll;
+                    return MenuItem.ListAll;
 
                 case ConsoleKey.NumPad3:
                 case ConsoleKey.D3:
-                    return (int)MenuItem.Search;
+                    return MenuItem.Search;
 
                 case ConsoleKey.NumPad4:
                 case ConsoleKey.D4:
-                    return (int)MenuItem.Quit;
+                    return MenuItem.Sort;
+
+                case ConsoleKey.NumPad5:
+                case ConsoleKey.D5:
+                    return MenuItem.Quit;
 
                 default:
-                    return -1;
+                    return MenuItem.Default;
             }
 
         }

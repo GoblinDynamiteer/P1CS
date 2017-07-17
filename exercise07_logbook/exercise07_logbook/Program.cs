@@ -20,7 +20,7 @@
  *   - Create one or several methods
  *  
  * Johan Kämpe
- * 2017-07-14
+ * 2017-07-17
  * https://github.com/GoblinDynamiteer/  
  * https://www.linkedin.com/in/johankampe/  
  *   
@@ -29,7 +29,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace exercise07_logbook
@@ -38,30 +37,36 @@ namespace exercise07_logbook
     {
         static void Main(string[] args)
         {
-            Logbook logbook = new Logbook(true);
+            /* Create a new logbook object, pass argument 
+             * 'true' to create sample entries */
+            Logbook logbook = new Logbook();
 
-            Menu.MenuItem userChoice = Menu.MenuItem.Default; // User meny choice
+            /* User menu choice enum variable, to navigate main menu */
+            Menu.MenuItem userChoice = Menu.MenuItem.Default;
+
+            /* Run main menu until user choses to quit the program */
             while (userChoice != Menu.MenuItem.Quit)
             {
+                /* Get user menu choice from method */
                 userChoice = Menu.DisplayMenu();
 
                 switch (userChoice)
                 {
-                    case Menu.MenuItem.Add:
+                    case Menu.MenuItem.Add: // Add logbook entry
                         Menu.DisplayTitle("Add log entry");
                         logbook.AddEntry();
                         break;
 
-                    case Menu.MenuItem.ListAll:
+                    case Menu.MenuItem.ListAll: // List all entries
                         logbook.DisplayAllTitles();
                         break;
 
-                    case Menu.MenuItem.Search:
+                    case Menu.MenuItem.Search: // Searc entries
                         Menu.DisplayTitle("Search entries");
                         logbook.Search();
                         break;
 
-                    case Menu.MenuItem.Sort:
+                    case Menu.MenuItem.Sort: // Sort entries
                         Menu.DisplayTitle("Sort entries");
                         logbook.Sort();
                         break;
@@ -71,7 +76,9 @@ namespace exercise07_logbook
                 }
             }
 
+            /* Save logbook data to file before quitting */
             logbook.Save();
+
             Menu.DisplayTitle();
             Menu.Wait("Thanks for using the logbook!\n" +
                 "Press any key to quit...");
@@ -99,6 +106,7 @@ namespace exercise07_logbook
             MaxHits = 50
         }
 
+        /* Text for sort menu */
         string[] sortMenu = {
             "Entry ID, Ascending",
             "Entry ID, Descending",
@@ -108,6 +116,7 @@ namespace exercise07_logbook
             "Entry Date Descending"
         };
 
+        /* Text for display entry menu */
         string[] displayEntryMenu = {
             "Export to text file",
             "Change title",
@@ -115,6 +124,7 @@ namespace exercise07_logbook
             "Delete entry"
         };
 
+        /* For chosing sorting mode */
         public enum SortBy
         {
             IDAscending,
@@ -190,6 +200,7 @@ namespace exercise07_logbook
                 id++;
             }
 
+            /* Add prewritten samples */
             if (addSamples)
             {
                 AddSamples();
@@ -227,6 +238,7 @@ namespace exercise07_logbook
                     break;
                 }
 
+                /* If either title, date or content contains search-string text */
                 if (entry[(int)EntryData.Content].Contains(searchString) ||
                     entry[(int)EntryData.Title].Contains(searchString) ||
                     entry[(int)EntryData.Date].Contains(searchString))
@@ -248,19 +260,22 @@ namespace exercise07_logbook
         /* Display entries stored in searchHits array */
         public void DisplaySearchHits(int hits)
         {
-            if (hits == 0)
+            if (hits == 0) // No search hits found
             {
                 Menu.DisplayTitle(string.Format(
                     "Search: Found no hits for {0}", lastSearchString));
                 Menu.Wait("Found no entries!\nPress any key to continue!");
-                return;
+                return; // End method
             }
 
             Menu.DisplayTitle(string.Format("Search: Found {0} hits for {1}", 
                 hits, lastSearchString));
             Console.WriteLine("ID\tDATE\t\t\tTITLE");
+
             for (int i = 0; i < (int)SearchData.MaxHits; i++)
             {
+                /* Break if element is considered empty,
+                 * all searchhits has been listed */
                 if (searchHits[i] == (int)SearchData.Empty)
                 {
                     break;
@@ -269,8 +284,8 @@ namespace exercise07_logbook
                 DisplayTitle(searchHits[i]);
             }
 
-            Console.WriteLine();
-            DisplayEntry();
+            Console.WriteLine(); // For new line
+            DisplayEntry();      // Will ask user to enter entry ID
         }
 
         /* Display all log entries */
@@ -289,8 +304,8 @@ namespace exercise07_logbook
 
             entries.ForEach(entry => DisplayTitle(int.Parse(entry[(int)EntryData.ID])));
 
-            Console.WriteLine();
-            DisplayEntry();
+            Console.WriteLine(); // For new line
+            DisplayEntry();      // Will ask user to enter entry ID
         }
 
         /* Display entry title with id and creation date */
@@ -309,7 +324,7 @@ namespace exercise07_logbook
             /* Add logbook entry contents to string array */
             string[] stringEntry = new string[4];
             stringEntry[(int)EntryData.Title]   = title;
-            stringEntry[(int)EntryData.ID]      = id++.ToString();
+            stringEntry[(int)EntryData.ID]      = id++.ToString(); // Increase ID for next entry
             stringEntry[(int)EntryData.Date]    = DateTime.Now.ToString();
             stringEntry[(int)EntryData.Content] = content;
 
@@ -319,7 +334,7 @@ namespace exercise07_logbook
             Console.WriteLine("Added new entry: ");
             DisplayTitle(id-1);
 
-            return id - 1;
+            return id - 1; // Return ID of created entry
         }
 
         /* Add entry to logbook, manual input */
@@ -335,7 +350,8 @@ namespace exercise07_logbook
             Console.WriteLine("Enter text for new entry: ");
             content = Console.ReadLine();
 
-            while (content == "")
+            /* Display error while user enters blank text */
+            while (content == "") 
             {
                 Menu.Error(errorMsg[(int)ErrorId.BlankEntry], false);
                 Console.WriteLine("Enter text for new entry: ");
@@ -354,6 +370,7 @@ namespace exercise07_logbook
                 "Press any key to continue", id));
         }
 
+        /* Display entry, manual ID input  */
         public void DisplayEntry()
         {
             Console.WriteLine("Enter ID to display entry." +
@@ -363,19 +380,20 @@ namespace exercise07_logbook
 
             if (stringID == "") // Return to main menu
             {
-                return;
+                return; // End method
             }
 
-            if (!int.TryParse(stringID, out int id)) // Parsing error
+            /* Parsing error of input, display error */
+            if (!int.TryParse(stringID, out int id)) 
             {
                 Menu.Error(errorMsg[(int)ErrorId.IntInput], true);
-                return;
+                return; // End method
             }
 
             DisplayEntry(id); // Display entry with parsed ID
         }
 
-        /* Display a log entry, pass id as parameter */
+        /* Display a log entry, pass ID as parameter */
         public void DisplayEntry(int id)
         {
             /* Search for list index */
@@ -393,7 +411,7 @@ namespace exercise07_logbook
             Console.WriteLine(entries[index][(int)EntryData.Content]);
             Menu.DisplayLine();
 
-
+            /* User options for current entry */
             Console.WriteLine("Options:");
             for (int i = 0; i < displayEntryMenu.Length; i++)
             {
@@ -450,7 +468,7 @@ namespace exercise07_logbook
             if (index == -1) // Error
             {
                 Menu.Error(errorMsg[(int)ErrorId.IDNotFound]);
-                return;
+                return; // End method
             }
 
             Console.WriteLine("Enter new title: ");
@@ -468,7 +486,7 @@ namespace exercise07_logbook
             if (index == -1) // Error
             {
                 Menu.Error(errorMsg[(int)ErrorId.IDNotFound]);
-                return;
+                return; // End method
             }
 
             Console.WriteLine("Enter new content: ");
@@ -500,7 +518,7 @@ namespace exercise07_logbook
             catch (Exception)
             {
                 Menu.Error(errorMsg[(int)ErrorId.Export], true);
-                return; // Quit method if error
+                return; // End method
             }
 
             Console.WriteLine("File exported to {0}.txt!", filename);
@@ -518,12 +536,14 @@ namespace exercise07_logbook
                 datafile = new FileStream(
                     dataFileName, FileMode.Create);
             }
+
             /* Eg. If write protected */
             catch (Exception)
             {
                 success = false;
             }
 
+            /* If datafile can be written, write logbook data to file */
             if (success)
             {
                 try
@@ -531,13 +551,15 @@ namespace exercise07_logbook
                     BinaryFormatter formatter = new BinaryFormatter();
                     formatter.Serialize(datafile, entries);
                 }
+
                 catch (Exception)
                 {
                     Menu.Error(errorMsg[(int)ErrorId.DataSave]);
                 }
+
                 finally
                 {
-                    datafile.Close();
+                    datafile.Close(); // Close data file
                 }
             }
 
@@ -577,7 +599,7 @@ namespace exercise07_logbook
                     success = false;
                 }
 
-                datafile.Close();
+                datafile.Close(); // Close data file
             }
 
             return success;
@@ -593,6 +615,7 @@ namespace exercise07_logbook
                 entries[index][(int)EntryData.Content] : content;
         }
 
+        /* Sort entries with insertion sort, user choses sorting method */
         public void Sort()
         {
             Menu.DisplayTitle("Sort Entries");
@@ -643,73 +666,81 @@ namespace exercise07_logbook
                     return; // End method
             }
 
+            /* Ask user to display all entries after sort */
             if (Menu.Confirm("Entries sorted!\n" +
                 "Press (Y) to display all entries"))
             {
                 DisplayAllTitles();
             }
+
         }
 
         /* Sort entries with insertion sort */
         public void Sort(SortBy sort = SortBy.DateAscending)
         {
-            int sortIndex;
-            bool ascending;
+            int sortIndex;  // Title/Date/ID index for char array in logbook list
+            bool ascending; // Sort direction
 
-            switch (sort)
+            switch (sort) // Switch on SortBy enum
             {
                 case SortBy.IDAscending:
                     sortIndex = (int)EntryData.ID;
                     ascending = true;
                     break;
+
                 case SortBy.IDDescending:
                     sortIndex = (int)EntryData.ID;
                     ascending = false;
                     break;
+
                 case SortBy.TitleAscending:
                     sortIndex = (int)EntryData.Title;
                     ascending = true;
                     break;
+
                 case SortBy.TitleDescending:
                     sortIndex = (int)EntryData.Title;
                     ascending = false;
                     break;
+
                 case SortBy.DateAscending:
                     sortIndex = (int)EntryData.Date;
                     ascending = true;
                     break;
+
                 case SortBy.DateDescending:
                     sortIndex = (int)EntryData.Date;
                     ascending = false;
                     break;
-                default:
+
+                default: // Errror
                     Menu.Error(errorMsg[(int)ErrorId.Sort], true);
-                    return;
+                    return; // End Method, skip sorting
             }
             
-            /* Indexes for sorting */
+            /* Insertion Sort */
             int ix, jx;
 
             for (ix = 0; ix < entries.Count; ix++)
             {
-                jx = ix;
+                jx = ix; // Indexes
 
-                if (ascending)
+                if (ascending) // Ascending sort
                 {
                     while (jx != 0 &&
                         string.Compare(entries[jx - 1][sortIndex], entries[jx][sortIndex]) > 0)
                     {
-                        SortSwap(jx, jx - 1);
+                        SortSwap(jx, jx - 1); // Swap list elements
                         jx--;
                     }
                 }
 
-                else
+                else // Descending sort
                 {
                     while (jx != 0 &&
                         string.Compare(entries[jx - 1][sortIndex], entries[jx][sortIndex]) < 0)
                     {
-                        SortSwap(jx, jx - 1);
+                        SortSwap(jx, jx - 1); // Swap list elements
                         jx--;
                     }
                 }
@@ -828,17 +859,23 @@ namespace exercise07_logbook
             bool line1 = true, bool line2 = true, bool clearScreen = true)
         {
             int titleLen = text.Length;
+
+            /* Determing left padding of title text, for center alignment.
+             * IF text is longer than line-lenght, set padding to zero */
             int paddingLen = titleLen < lineLen ? lineLen / 2 - titleLen / 2 : 0;
             
             string padding = "";
+
             for (int i = 0; i < paddingLen; i++)
             {
-                padding += " ";
+                padding += " "; // Increase padding
             }
 
+            /* Settings from parameters */
             if(clearScreen) Console.Clear();
             if(line1) DisplayLine();
-            Console.WriteLine(padding + text.ToUpper());
+            /* Padding + text = centered text, uppercased */
+            Console.WriteLine(padding + text.ToUpper()); 
             if(line2) DisplayLine();
         }
 
